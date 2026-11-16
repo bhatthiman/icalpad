@@ -1,16 +1,19 @@
 # iCalPad
 
-**A free engineering math worksheet that runs in your browser.** Type equations anywhere on the page, use real units, get exact symbolic answers, plot and animate functions, and mark up pictures. No install, no account, no license fee.
+**A free and open-source symbolic calculator that runs in your browser.** Type equations anywhere on the page, use real units, get exact symbolic answers, plot and animate functions, and mark up pictures. No install, no account, no license fee.
 
 ### [▶ Open iCalPad](https://hse95.github.io/icalpad/)
 
 The whole app is **one HTML file of about 270 KB** (about 84 KB over the network). It opens in a second, works on a phone, and keeps your worksheet in your own browser.
 
+> [!IMPORTANT]
+> **Always check your answers.** iCalPad is a new tool and may contain errors. Verify any result before you rely on it, especially in design or other work where a mistake matters.
+
 ![iCalPad worksheet with symbolic answers, a plot and an annotated sketch](docs/media/hero.png)
 
 ## Why iCalPad
 
-Tools such as Mathcad and Mathematica are excellent, but they cost money, need an install, and are not always at hand on a lab computer or a phone. iCalPad aims to cover the everyday part of that work for free:
+I was tired of paying for software, especially symbolic calculators. Tools such as Mathcad and Mathematica are excellent, but they cost money, need an install, and are not always at hand on a lab computer or a phone. I built iCalPad to use it myself, and anyone else is free to use it as well. It is **free and open source** under the MIT license, so you can use it, copy it, change it and share it. It aims to cover the everyday part of that work:
 
 - **Free-form page.** Click anywhere and type. Drag equations, notes, plots and pictures wherever you want them, like a calculation pad.
 - **Real units.** `90 km/hr`, `200 GPa`, `5 kip*ft`. Units convert on their own, and adding a length to a force is caught as an error.
@@ -76,7 +79,9 @@ Open **Examples** in the app for ready-made worksheets: a quick tour, a symbolic
 
 ## What iCalPad is not
 
-iCalPad is a young, single-file web app, and it does not try to match every feature of commercial packages. It does not open `.mcdx` or notebook files, it has no programming blocks, and its built-in solver covers common problems rather than every possible one. Results should be checked as with any calculation tool, and it is the responsibility of the user to verify results used in design.
+iCalPad is a young, single-file web app, and it does not try to match every feature of commercial packages. It does not open `.mcdx` or notebook files, it has no programming blocks, and its built-in solver covers common problems rather than every possible one.
+
+**Check your answers.** iCalPad is provided as is, without any warranty. Check results by hand, with another tool, or against known cases before you use them, and it is the responsibility of the user to verify any result used in design. If you find a wrong answer, please report it so it can be fixed.
 
 ## Your data
 
@@ -106,12 +111,14 @@ npm run test:solver  # advanced solver tests (needs python3 and sympy)
 
 It has been tested in Chrome on desktop and on a phone-sized screen. If something does not work in your browser, please open an issue.
 
-## Feedback
+## Credits and feedback
 
-Built by **Sam Smith** at Kansas State University, with Claude Fable 5.2. Suggestions and bug reports are welcome as [GitHub issues](https://github.com/hse95/icalpad/issues) or by email at **samsmith@ksu.edu**.
+iCalPad was created by **Sam Smith** (Kansas State University) and **Claude** (Claude Fable 5.2, by Anthropic). I built it to use it myself, and anyone else is free to use it as well.
+
+Feedback is very welcome, especially from engineers. Please send suggestions and bug reports as [GitHub issues](https://github.com/hse95/icalpad/issues) or by email to **samsmith@ksu.edu**.
 
 ## License
 
-[MIT](LICENSE)
+iCalPad is free and open source under the [MIT License](LICENSE). You may use, copy, modify and share it, including for commercial work, as long as the license notice is kept. The software comes with no warranty.
 
 Mathcad is a trademark of PTC Inc. Mathematica is a trademark of Wolfram Research, Inc. iCalPad is an independent project and is not affiliated with either company.
