@@ -377,6 +377,7 @@ function symTex(name, unit) {
   const piece = (s, isSub) => GREEKS.has(s) ? '\\' + s + ' ' : [...s].length === 1 || /^\d+$/.test(s) ? s : isSub ? `\\mathrm{${s}}` : `\\mathit{${s}}`;
   return piece(base, false) + prime + (sb ? `_{${piece(sb, true)}}` : '');
 }
+let SUP = 0;                                  // > 0 while typesetting an exponent
 const texAtom = x => x.t === 'bin' || x.t === 'neg' || x.t === 'rel' ? par(tex(x)) : tex(x);
 function callTex(x) {
   const n = x.name, a = x.args, A = a.map(tex);
@@ -420,11 +421,16 @@ function tex(x) {
       if (op === '-') return tex(l) + '-' + (prec(r) <= PR.ADD || r.t === 'neg' ? par(tex(r)) : tex(r));
       if (op === '/') {
         if (isUnitExpr(r) && endsUnit(l)) return tex(l) + '/' + (r.t === 'bin' && r.op !== '^' ? `(${unitTex(r)})` : unitTex(r));   // 12 kN/m stays on one line
+        if (SUP > 0) {                         // inside an exponent a slash reads better than a tiny stacked fraction
+          const L = prec(l) <= PR.ADD ? par(tex(l)) : tex(l), R = r.t === 'bin' || r.t === 'neg' ? par(tex(r)) : tex(r);
+          return L + '/' + R;
+        }
         return `\\frac{${tex(l)}}{${tex(r)}}`;
       }
       if (op === '^') {
         const wrap = l.t === 'bin' || l.t === 'neg' || l.t === 'rel' || (l.t === 'num' && l.e !== undefined) || (l.t === 'call' && ['sqrt', 'root', 'cbrt', 'diff', 'int', 'sum', 'prod', 'limit', 'exp', 'factorial', 'if', 'transpose'].includes(l.name));
-        return (wrap ? par(tex(l)) : tex(l)) + `^{${tex(r)}}`;
+        SUP++; let rt; try { rt = tex(r); } finally { SUP--; }
+        return (wrap ? par(tex(l)) : tex(l)) + `^{${rt}}`;
       }
       const lp = prec(l) <= PR.ADD, rp = prec(r) <= PR.ADD || r.t === 'neg';
       const L = lp ? par(tex(l)) : tex(l), R = rp ? par(tex(r)) : tex(r);
@@ -516,7 +522,9 @@ function pickUnit(u, unitRaw, v) {          // -> {f, tex, text} display unit fo
   }
   if (!u) return { f: 1, tex: '', text: '' };
   // prefer a unit already used on this line, then one used elsewhere in the worksheet
-  const own = C.stmtUnits.find(n => sameDims(UNITS[n].d, d));
+  // a unit used on this line or by the values it uses, if it gives a readable number (45.5 m, not 0.0455 km)
+  const readable = n => typeof v !== 'number' || !Number.isFinite(v) || v === 0 || (Math.abs(v) / UNITS[n].f >= 0.1 && Math.abs(v) / UNITS[n].f < 1e5);
+  const own = C.stmtUnits.find(n => sameDims(UNITS[n].d, d) && readable(n));
   if (own) return unitInfo(own);
   if (d[0] >= 2 && d[0] <= 4 && d.slice(1).every(v => !v)) {     // areas, section moduli, inertias follow the worksheet's length unit
     const len = C.stmtUnits.find(n => sameDims(UNITS[n].d, LEN_DIMS));
