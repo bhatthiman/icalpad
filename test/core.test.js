@@ -218,13 +218,13 @@ t(['K := [600, -200; -200, 200] kN/m', 'Mm := [20, 0; 0, 10] tonne', 'lam := eig
 t(['P := 2 MPa', 'D := 1000 mm', 't := 12 mm', 'sigma_h := P*D/(2*t) ='], '83.33 MPa', 'substituted formula numeric result');
 {
   const r = last(['P := 2 MPa', 'D := 1000 mm', 't := 12 mm', 'sigma_h := P*D/(2*t) =']);
-  const ok = !!r.subTex && ['2', '1000', '12', 'MPa', 'mm'].every(x => r.subTex.includes(x)) && !/\\b(P|D|t)\\b/.test(r.subTex);
-  if (ok) pass++; else { fail++; console.log('FAIL substituted formula expansion\\n   got:  ' + r.subTex); }
+  const ok = !!r.subTex && ['2', '1000', '12', 'MPa', 'mm'].every(x => r.subTex.includes(x)) && !/\b(P|D|t)\b/.test(r.subTex);
+  if (ok) pass++; else { fail++; console.log('FAIL substituted formula expansion\n   got:  ' + r.subTex); }
 }
 {
   const r = last(['P := 2 MPa', 'Q := 3*P', 'D := 1000 mm', 't := 12 mm', 'Q*D/(2*t) =']);
-  const ok = !!r.subTex && ['2', '3', '1000', '12', 'MPa', 'mm'].every(x => r.subTex.includes(x)) && !/\\b(P|Q|D|t)\\b/.test(r.subTex);
-  if (ok) pass++; else { fail++; console.log('FAIL nested substituted formula expansion\\n   got:  ' + r.subTex); }
+  const ok = !!r.subTex && ['2', '3', '1000', '12', 'MPa', 'mm'].every(x => r.subTex.includes(x)) && !/\b(P|Q|D|t)\b/.test(r.subTex);
+  if (ok) pass++; else { fail++; console.log('FAIL nested substituted formula expansion\n   got:  ' + r.subTex); }
 }
 {
   const r = last('2 + 3 =');
