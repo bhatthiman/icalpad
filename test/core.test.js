@@ -217,7 +217,7 @@ t(['K := [600, -200; -200, 200] kN/m', 'Mm := [20, 0; 0, 10] tonne', 'lam := eig
 // Substitution must not merge adjacent numeric factors (2 * v0 -> 2·25 m/s).
 {
   const r = last(['v0 := 25 m/s', 'θ := 40 deg', 'g := 9.81 m/s^2', 'tf := 2v0*sin(θ)/g =']);
-  const ok = !r.err && !!r.subTex && /2\\\\cdot\\\\s*25/.test(r.subTex) && !/225/.test(r.subTex);
+  const ok = !r.err && !!r.subTex && /2\\cdot\s*25/.test(r.subTex) && !/225/.test(r.subTex);
   if (ok) pass++; else { fail++; console.log('FAIL numeric factor separator in substituted formula\\n   got: ' + JSON.stringify({ err: r.err, subTex: r.subTex, text: r.text })); }
 }
 
