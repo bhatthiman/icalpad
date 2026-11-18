@@ -599,13 +599,10 @@ function expandDisplayExpr(x, scope, seen = new Set()) {
   return out;
 }
 
-// A standalone variable converted to another unit uses its stored value; do not
-// expand its original definition into a formula-substitution display.
-function substitutedDisplayTex(expr, scope, targetUnit) {
-  if (targetUnit && expr && expr.t === 'sym') {
-    const entry = scope.get(expr.name);
-    if (entry && !entry.fn) return '';
-  }
+// Expand defined variables even when the line is a unit conversion.
+// The substitution keeps the source units; showNumeric formats the final value
+// in the requested target unit.
+function substitutedDisplayTex(expr, scope) {
   const expanded = expandDisplayExpr(expr, scope);
   return tex(expanded) !== tex(expr) ? '= ' + tex(expanded) : '';
 }
@@ -645,7 +642,7 @@ function runStatement(st, scope) {
     let v = ev(expr, env), extra = '', text = '', check, subTex = '';
     if (st.show === 'sym') { const s = symbolic(v); v = s.r; extra = ARROW(s.kw) + toTex(v); text = toText(v); }
     else if (st.show === 'num') {
-      subTex = substitutedDisplayTex(expr, scope, st.unit);
+      subTex = substitutedDisplayTex(expr, scope);
       const s = showNumeric(v, st.unit); extra = '=' + s.tex; text = s.text; check = s.check;
     }
     scope.set(name, { v, expr });
@@ -654,7 +651,7 @@ function runStatement(st, scope) {
   if (kind === 'eval') {
     if (st.show === 'sym') { const s = symbolic(st.mod && (BIND[KW[st.mod.kw] || st.mod.kw]) ? ZERO : ev(expr, env)); return { kind: 'sym', value: s.r, tex: inTex, res: ARROW(s.kw) + toTex(s.r), text: toText(s.r), hint: unevaluated(s.r) }; }
     const v = ev(expr, env), s = showNumeric(v, st.unit);
-    const subTex = substitutedDisplayTex(expr, scope, st.unit);
+    const subTex = substitutedDisplayTex(expr, scope);
     return { kind: 'eval', value: v, tex: inTex, subTex, res: '=' + s.tex, text: s.text, check: s.check };
   }
   // a bare expression: show a value when there is one
