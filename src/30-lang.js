@@ -435,6 +435,8 @@ function tex(x) {
       const lp = prec(l) <= PR.ADD, rp = prec(r) <= PR.ADD || r.t === 'neg';
       const L = lp ? par(tex(l)) : tex(l), R = rp ? par(tex(r)) : tex(r);
       let sep = '\\cdot ';
+      // Keep an explicit dot when an implicit variable expands to a numeric factor.
+      if (x.imp && endsNum(l) && startsNum(r)) sep = '\\cdot ';
       if (!rp && startsUnit(r) && isMatLike(l)) sep = '\\;';
       else if (!rp && startsUnit(r) && !(r.t === 'sym' && r.name === 'deg')) sep = isUnitSym(l) || (l.t === 'bin' && startsUnit(l) && !endsNum(l)) || (l.t === 'bin' && l.op !== '*' ? false : endsUnit(l)) ? '{\\cdot}' : '\\,';
       else if (r.t === 'sym' && r.name === 'deg' && isUnitSym(r)) sep = '';
