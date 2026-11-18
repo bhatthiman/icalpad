@@ -587,9 +587,12 @@ function expandDisplayExpr(x, scope, seen = new Set()) {
   if (!x || typeof x !== 'object') return x;
   if (x.t === 'sym') {
     const entry = scope.get(x.name);
-    if (entry && !entry.fn && entry.expr && !seen.has(x.name)) {
+    // Prefer the expression snapshot captured when this value was defined.
+    // Unresolved names remain symbols and can still use the worksheet's late binding.
+    const source = entry && (entry.displayExpr || entry.expr);
+    if (entry && !entry.fn && source && !seen.has(x.name)) {
       const next = new Set(seen); next.add(x.name);
-      return expandDisplayExpr(entry.expr, scope, next);
+      return expandDisplayExpr(source, scope, next);
     }
     return { ...x };
   }
@@ -645,7 +648,10 @@ function runStatement(st, scope) {
       subTex = substitutedDisplayTex(expr, scope);
       const s = showNumeric(v, st.unit); extra = '=' + s.tex; text = s.text; check = s.check;
     }
-    scope.set(name, { v, expr });
+    // Keep the display expansion as a definition-time snapshot. Later unit
+    // conversions reuse this expression and the already evaluated value.
+    const displayExpr = expandDisplayExpr(expr, scope);
+    scope.set(name, { v, expr, displayExpr });
     return { kind: 'def', name, value: v, tex: lt + '\\mathrel{:=}' + inTex, subTex, res: extra, text, check, hint: unevaluated(v) };
   }
   if (kind === 'eval') {
