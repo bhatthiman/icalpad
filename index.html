@@ -2489,7 +2489,7 @@ function showNumeric(c, unitRaw) {          // canonical value -> {tex, text, ch
   const n = numericC(c);
   if (n.t === 'b') return { tex: `\\text{${n.v}}`, text: String(n.v), check: n.v };
   const q = quant(n);
-  if (q) { const u = pickUnit(q.u, unitRaw, q.v), v = q.v / u.f; return { tex: numTex(v) + (u.tex ? (u.tex[0] === '^' ? '' : '\\,') + u.tex : ''), text: numText(v) + (u.text ? ' ' + u.text : '') }; }
+  if (q) { const u = pickUnit(q.u, unitRaw, q.v), v = q.v / u.f; return { tex: numTex(v) + (u.tex ? (u.tex[0] === '^' ? '' : '\\,') + u.tex : ''), text: numText(v) + (u.text ? ' ' + u.text : ''), displayedValue: v, displayUnit: { f: u.f, tex: u.tex, text: u.text } }; }
   if (n.t === 'm') {
     const qs = n.r.map(r => r.map(quant));
     if (qs.every(r => r.every(Boolean))) {
@@ -2543,6 +2543,20 @@ function substitutedDisplayTex(expr, scope) {
   return tex(expanded) !== tex(expr) ? '= ' + tex(expanded) : '';
 }
 
+// A conversion of a previously calculated scalar quantity is a conversion
+// of its stored display value, not another expansion of its defining formula.
+function conversionDisplayTex(expr, scope, targetUnit) {
+  if (!targetUnit || expr.t !== 'sym') return '';
+  const entry = scope.get(expr.name), shown = entry && entry.displayNumeric;
+  if (!shown || !shown.displayUnit || !shown.displayUnit.tex) return '';
+  const target = unitInfo(targetUnit), source = shown.displayUnit;
+  const q = quant(numericC(entry.v));
+  if (!q || !sameDims(dimsOf(q.u), dimsOf(target.raw))) return '';
+  const factor = target.f / source.f;
+  return '= ' + numTex(shown.displayedValue) + '\\,' + source.tex +
+    '\\times ' + numTex(factor) + '\\,\\frac{' + target.tex + '}{' + source.tex + '}';
+}
+
 // ---------- running a worksheet ----------
 const SHAPERS = new Set(['factor', 'expand', 'apart', 'collect', 'ratsimp', 'simplify', 'taylor', 'float', 'coeffs']);
 const ARROW = kw => kw ? `\\xrightarrow{\\text{${kw}}}` : '\\rightarrow ';
@@ -2575,22 +2589,21 @@ function runStatement(st, scope) {
       scope.set(name, { fn: true, params, body });
       return { kind: 'def', name, params, tex: lt + '\\mathrel{:=}' + inTex, res: extra, text, hint: unevaluated(body) };
     }
-    let v = ev(expr, env), extra = '', text = '', check, subTex = '';
+    let v = ev(expr, env), extra = '', text = '', check, subTex = '', displayNumeric;
     if (st.show === 'sym') { const s = symbolic(v); v = s.r; extra = ARROW(s.kw) + toTex(v); text = toText(v); }
     else if (st.show === 'num') {
       subTex = substitutedDisplayTex(expr, scope);
-      const s = showNumeric(v, st.unit); extra = '=' + s.tex; text = s.text; check = s.check;
+      const s = showNumeric(v, st.unit); displayNumeric = s; extra = '=' + s.tex; text = s.text; check = s.check;
     }
-    // Keep the display expansion as a definition-time snapshot. Later unit
-    // conversions reuse this expression and the already evaluated value.
+    // Keep the display expansion and the formatted numeric value as snapshots.
     const displayExpr = expandDisplayExpr(expr, scope);
-    scope.set(name, { v, expr, displayExpr });
+    scope.set(name, { v, expr, displayExpr, displayNumeric });
     return { kind: 'def', name, value: v, tex: lt + '\\mathrel{:=}' + inTex, subTex, res: extra, text, check, hint: unevaluated(v) };
   }
   if (kind === 'eval') {
     if (st.show === 'sym') { const s = symbolic(st.mod && (BIND[KW[st.mod.kw] || st.mod.kw]) ? ZERO : ev(expr, env)); return { kind: 'sym', value: s.r, tex: inTex, res: ARROW(s.kw) + toTex(s.r), text: toText(s.r), hint: unevaluated(s.r) }; }
     const v = ev(expr, env), s = showNumeric(v, st.unit);
-    const subTex = substitutedDisplayTex(expr, scope);
+    const subTex = conversionDisplayTex(expr, scope, st.unit) || substitutedDisplayTex(expr, scope);
     return { kind: 'eval', value: v, tex: inTex, subTex, res: '=' + s.tex, text: s.text, check: s.check };
   }
   // a bare expression: show a value when there is one
