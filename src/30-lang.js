@@ -620,9 +620,9 @@ function conversionDisplayTex(expr, scope, targetUnit) {
   if (!targetQ) return '';
   const q = quant(numericC(entry.v));
   if (!q || !sameDims(dimsOf(q.u), dimsOf(targetQ.u))) return '';
-  const factor = source.f / targetQ.v, targetTex = unitTex(targetUnit);
+  const factor = source.f / targetQ.v, factorTex = Number(factor.toPrecision(6)).toString(), targetTex = unitTex(targetUnit);
   return '= ' + numTex(shown.displayedValue) + '\\,' + source.tex +
-    '\\times ' + numTex(factor) + '\\,\\frac{' + targetTex + '}{' + source.tex + '}';
+    '\\times ' + factorTex + '\\,\\frac{' + targetTex + '}{' + source.tex + '}';
 }
 
 // ---------- running a worksheet ----------
