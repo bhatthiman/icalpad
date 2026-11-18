@@ -246,5 +246,15 @@ t(['P := 2 MPa', 'D := 1000 mm', 't := 12 mm', 'sigma_h := P*D/(2*t) ='], '83.33
     /psi/.test(r.text) && /12086/.test(r.text);
   if (ok) pass++; else { fail++; console.log('FAIL conversion should use the stored value and definition-time expression\\n   got: ' + JSON.stringify({ err: r.err, subTex: r.subTex, text: r.text })); }
 }
+// A conversion line should start from the stored displayed result, not
+// repeat the original equation that produced it.
+{
+  const r = last(['P := 2 MPa', 'sigma_h := P*2 =', 'sigma_h = psi']);
+  const ok = !r.err && !!r.subTex &&
+    /4/.test(r.subTex) && /MPa/.test(r.subTex) &&
+    /145/.test(r.subTex) && /psi/.test(r.subTex) &&
+    !/P/.test(r.subTex) && !/2\\s*MPa/.test(r.subTex);
+  if (ok) pass++; else { fail++; console.log('FAIL conversion should use stored value and explicit factor\\n   got: ' + JSON.stringify({ err: r.err, subTex: r.subTex, text: r.text })); }
+}
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
