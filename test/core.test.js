@@ -231,12 +231,14 @@ t(['P := 2 MPa', 'D := 1000 mm', 't := 12 mm', 'sigma_h := P*D/(2*t) ='], '83.33
   if (!r.subTex) pass++; else { fail++; console.log('FAIL unexpected substitution line: ' + r.subTex); }
 }
 
-// Unit conversion of a previously evaluated variable must use its stored value
-// and must not display/re-expand the original defining equation.
+// Unit conversion of a previously evaluated variable retains the
+// substituted source expression and reports the final value in the target unit.
 {
   const r = last(['P := 2 MPa', 'D := 1000 mm', 't := 12 mm', 'sigma_h := P*D/(2*t) =', 'sigma_h = psi']);
-  const ok = !r.err && !r.subTex && /psi/.test(r.text);
-  if (ok) pass++; else { fail++; console.log('FAIL conversion-only line should not expand the defining equation\\n   got: ' + JSON.stringify({ err: r.err, subTex: r.subTex, text: r.text })); }
+  const ok = !r.err && !!r.subTex &&
+    ['2', '1000', '12', 'MPa', 'mm'].every(x => r.subTex.includes(x)) &&
+    !/\\b(P|D|t|sigma_h)\\b/.test(r.subTex) && /psi/.test(r.text);
+  if (ok) pass++; else { fail++; console.log('FAIL conversion should show substituted source expression and target unit\\n   got: ' + JSON.stringify({ err: r.err, subTex: r.subTex, text: r.text })); }
 }
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);
