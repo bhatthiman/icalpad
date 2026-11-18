@@ -243,7 +243,7 @@ t(['P := 2 MPa', 'D := 1000 mm', 't := 12 mm', 'sigma_h := P*D/(2*t) ='], '83.33
   const ok = !r.err && !!r.subTex &&
     ['2', '1000', '12', 'MPa', 'mm'].every(x => r.subTex.includes(x)) &&
     !/\\b(P|D|t|sigma_h)\\b/.test(r.subTex) &&
-    /psi/.test(r.text) && /12083/.test(r.text);
+    /psi/.test(r.text) && /12086/.test(r.text);
   if (ok) pass++; else { fail++; console.log('FAIL conversion should use the stored value and definition-time expression\\n   got: ' + JSON.stringify({ err: r.err, subTex: r.subTex, text: r.text })); }
 }
 console.log(`\n${pass} passed, ${fail} failed`);
