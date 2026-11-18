@@ -2333,7 +2333,7 @@ function callTex(x) {
   const head = TEXFN.has(n) ? '\\' + n : (FN[n] || NF[n]) ? `\\operatorname{${n}}` : symTex(n, false);
   return head + par(A.join(',\\,'));
 }
-const startsNum = x => x.t === 'num' || (x.t === 'bin' && (x.op === '*' || x.op === '^') && startsNum(x.l));
+const startsNum = x => x.t === 'num' || (x.t === 'bin' && (x.op === '*' || x.op === '/' || x.op === '^') && startsNum(x.l));
 const endsNum = x => (x.t === 'num' && x.e === undefined) || (x.t === 'bin' && x.op === '*' && endsNum(x.r));
 const isUnitSym = x => x.t === 'sym' && (x.unit !== undefined ? x.unit : isUnitName(x.name) || x.name === 'deg');
 const isMatLike = x => x.t === 'mat' || (x.t === 'bin' && x.op === '*' && isMatLike(x.r));
