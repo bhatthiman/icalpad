@@ -241,9 +241,9 @@ t(['P := 2 MPa', 'D := 1000 mm', 't := 12 mm', 'sigma_h := P*D/(2*t) ='], '83.33
     'sigma_h = psi'
   ]);
   const ok = !r.err && !!r.subTex &&
-    /83\\.33/.test(r.subTex) && /MPa/.test(r.subTex) &&
-    /145\\.038/.test(r.subTex) && /psi/.test(r.subTex) &&
-    !/\\b(P|D|t|sigma_h)\\b/.test(r.subTex) &&
+    /83\.33/.test(r.subTex) && /MPa/.test(r.subTex) &&
+    /145\.038/.test(r.subTex) && /psi/.test(r.subTex) &&
+    !/\b(P|D|t|sigma_h)\b/.test(r.subTex) &&
     /12086/.test(r.text);
   if (ok) pass++; else { fail++; console.log('FAIL conversion should use stored result and factor\\n   got: ' + JSON.stringify({ err: r.err, subTex: r.subTex, text: r.text })); }
 }
@@ -254,7 +254,7 @@ t(['P := 2 MPa', 'D := 1000 mm', 't := 12 mm', 'sigma_h := P*D/(2*t) ='], '83.33
   const ok = !r.err && !!r.subTex &&
     /4/.test(r.subTex) && /MPa/.test(r.subTex) &&
     /145/.test(r.subTex) && /psi/.test(r.subTex) &&
-    !/P/.test(r.subTex) && !/2\\s*MPa/.test(r.subTex);
+    !/P/.test(r.subTex) && !/2\s*MPa/.test(r.subTex);
   if (ok) pass++; else { fail++; console.log('FAIL conversion should use stored value and explicit factor\\n   got: ' + JSON.stringify({ err: r.err, subTex: r.subTex, text: r.text })); }
 }
 console.log(`\n${pass} passed, ${fail} failed`);
