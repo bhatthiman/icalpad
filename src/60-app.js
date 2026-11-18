@@ -18,7 +18,8 @@ const IC = {
   grip: '<circle cx="9" cy="6" r="1.2"/><circle cx="15" cy="6" r="1.2"/><circle cx="9" cy="12" r="1.2"/><circle cx="15" cy="12" r="1.2"/><circle cx="9" cy="18" r="1.2"/><circle cx="15" cy="18" r="1.2"/>',
   play: '<path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/>', pause: '<path d="M8.5 5.5v13M15.5 5.5v13"/>', x: '<path d="M6 6l12 12M18 6 6 18"/>',
   move: '<path d="M12 3v18M3 12h18M12 3l-3 3M12 3l3 3M12 21l-3-3M12 21l3-3M3 12l3-3M3 12l3 3M21 12l-3-3M21 12l-3 3"/>',
-  pen: '<path d="M4 20l4-1L19 8l-3-3L5 16z"/><path d="M14 7l3 3"/>', arrow: '<path d="M5 19 19 5M10 5h9v9"/>', label: '<path d="M5 6h14M12 6v13M9 19h6"/>',
+  pen: '<path d="M4 20l4-1L19 8l-3-3L5 16z"/><path d="M14 7l3 3"/>',
+  erase: '<path d="M8 20h11"/><path d="M5.6 14.4 13.9 6a2 2 0 0 1 2.8 0l2.3 2.3a2 2 0 0 1 0 2.8L10.8 19.3a2 2 0 0 1-1.4.6H8.2a2 2 0 0 1-1.4-.6l-1.2-1.2a2.6 2.6 0 0 1 0-3.7z"/><path d="M9.6 10.4l5 5"/>', arrow: '<path d="M5 19 19 5M10 5h9v9"/>', label: '<path d="M5 6h14M12 6v13M9 19h6"/>',
 };
 const ic = n => `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${IC[n]}</svg>`;
 const LS = {
@@ -59,6 +60,7 @@ function closeMenu() { if (menuEl) { menuEl.remove(); menuEl = null; $$('[aria-e
 /* items: {label, note, kbd, sel, act} | '-' | {hd} | {html} */
 function openMenu(anchor, items, wire) {
   const reopen = menuEl && menuEl._for === anchor; closeMenu(); if (reopen) return null;
+  items = items.filter((it, i, a) => it !== '-' || (i > 0 && i < a.length - 1 && a[i - 1] !== '-'));
   const acts = [];
   const html = items.map(it => it === '-' ? '<hr>' : it.hd ? `<div class="hd">${esc(it.hd)}</div>` : it.html ? it.html
     : `<button class="mi${it.sel ? ' sel' : ''}" role="menuitem" data-i="${acts.push(it.act) - 1}"><span>${esc(it.label)}${it.note ? `<small>${esc(it.note)}</small>` : ''}</span>${it.kbd ? `<kbd>${esc(it.kbd)}</kbd>` : ''}</button>`).join('');
@@ -203,7 +205,7 @@ function startDrag(ev, rg, mode, onClick) {
 }
 /* Wire a region's body so a mouse press drags it and a plain click runs onClick. */
 function grab(target, rg, onClick, guard) {
-  target.addEventListener('pointerdown', ev => { if (!FREE || ev.pointerType !== 'mouse' || ev.button !== 0 || (guard && !guard(ev))) return; ev.preventDefault(); startDrag(ev, rg, 'move', () => onClick(ev)); });
+  target.addEventListener('pointerdown', ev => { if (!FREE || ev.pointerType === 'touch' || ev.button !== 0 || (guard && !guard(ev))) return; ev.preventDefault(); startDrag(ev, rg, 'move', () => onClick(ev)); });
   target.addEventListener('click', ev => { if (Date.now() - skipClick < 350 || (guard && !guard(ev))) return; onClick(ev); });
 }
 
@@ -322,18 +324,38 @@ function annHtml(list) {
   }
   return h;
 }
+function segDist(px, py, x1, y1, x2, y2) {
+  const dx = x2 - x1, dy = y2 - y1, L = dx * dx + dy * dy, t = L ? Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / L)) : 0;
+  return Math.hypot(px - x1 - t * dx, py - y1 - t * dy);
+}
+function annHit(a, x, y, r) {                // does the eraser at (x, y) with radius r touch this mark?
+  if (a.t === 'pen') {
+    if (a.p.length === 2) return Math.hypot(a.p[0] - x, a.p[1] - y) < r + 5;
+    for (let i = 0; i + 3 < a.p.length; i += 2) if (segDist(x, y, a.p[i], a.p[i + 1], a.p[i + 2], a.p[i + 3]) < r + 4) return true;
+    return false;
+  }
+  if (a.t === 'arrow') return segDist(x, y, a.p[0], a.p[1], a.p[2], a.p[3]) < r + 5;
+  const w = a.s.length * 25;
+  return x > a.x - r && x < a.x + w + r && y > a.y - 42 - r && y < a.y + 10 + r;
+}
 function buildImage(rg) {
   const src = rg.img && S.doc.images[rg.img];
   const e = el(`<section class="rg image" data-id="${rg.id}">${hdlHtml}<div class="body"><div class="fig${src ? '' : ' sk'}">${src ? `<img alt="Picture on the worksheet" draggable="false">` : ''}<svg preserveAspectRatio="none" aria-hidden="true"></svg></div>
     <div class="edit itools" role="toolbar" aria-label="Drawing tools">
-      ${[['move', 'Move'], ['pen', 'Pen'], ['arrow', 'Arrow'], ['label', 'Label']].map(([k, l]) => `<button class="btn line tl" type="button" data-tool="${k}" aria-pressed="false">${ic(k)}${l}</button>`).join('')}
+      ${[['move', 'Move'], ['pen', 'Pen'], ['arrow', 'Arrow'], ['label', 'Label'], ['erase', 'Eraser']].map(([k, l]) => `<button class="btn line tl" type="button" data-tool="${k}" aria-pressed="false">${ic(k)}${l}</button>`).join('')}
       <span class="cols">${ACOL.map((c, i) => `<button class="col" type="button" data-col="${i}" aria-label="${ANAME[i]}" title="${ANAME[i]}" style="--sw:${c}"></button>`).join('')}</span>
       <button class="btn line" type="button" data-do="undo">Undo mark</button><button class="btn line" type="button" data-do="clear">Clear marks</button>
     </div></div><span class="rz" title="Drag to resize"></span></section>`);
   if (src) e.querySelector('img').src = src;
-  const fig = e.querySelector('.fig'), svg = fig.querySelector('svg'); let tool = 'move', col = src ? 0 : 2, live = null;
+  const fig = e.querySelector('.fig'), svg = fig.querySelector('svg'); let tool = 'move', col = src ? 0 : 2, live = null, ring = null;
+  const marks = [];                         // this picture's own undo list: {add} or {erased: [[index, mark], ...]}
   const H = () => Math.round(1000 * rg.ar);
-  const paint = () => { svg.setAttribute('viewBox', `0 0 1000 ${H()}`); svg.innerHTML = annHtml(live ? [...rg.ann, live] : rg.ann); };
+  const paint = () => {
+    svg.setAttribute('viewBox', `0 0 1000 ${H()}`);
+    svg.innerHTML = annHtml(live ? [...rg.ann, live] : rg.ann) + (ring ? `<circle cx="${ring.x}" cy="${ring.y}" r="${ring.r.toFixed(1)}" fill="none" style="stroke:var(--ink2)" stroke-width="3" stroke-dasharray="7 6"/>` : '');
+  };
+  /* Which tool a press uses: the eraser end of a stylus always erases, and a pen on a selected picture draws. */
+  const toolFor = ev => (ev.buttons & 32) ? 'erase' : tool === 'move' && ev.pointerType === 'pen' && S.active === rg.id ? 'pen' : tool;
   const syncTools = () => { for (const b of $$('[data-tool]', e)) b.setAttribute('aria-pressed', b.dataset.tool === tool); for (const b of $$('[data-col]', e)) b.classList.toggle('on', +b.dataset.col === col); fig.classList.toggle('tool', tool !== 'move'); };
   e._setTool = t => { tool = t; syncTools(); }; e._paint = paint; paint(); syncTools();
   const pt = ev => { const r = svg.getBoundingClientRect(); return [Math.round((ev.clientX - r.left) / r.width * 1000), Math.round((ev.clientY - r.top) / r.height * H())]; };
@@ -341,13 +363,32 @@ function buildImage(rg) {
     const t = ev.target.closest('[data-tool]'), c = ev.target.closest('[data-col]'), d = ev.target.closest('[data-do]');
     if (t) { tool = t.dataset.tool; syncTools(); }
     if (c) { col = +c.dataset.col; if (tool === 'move') tool = 'pen'; syncTools(); }
-    if (d) { if (d.dataset.do === 'undo') rg.ann.pop(); else rg.ann = []; paint(); touch(); commit(); }
+    if (d) {
+      if (d.dataset.do === 'clear') { if (rg.ann.length) marks.push({ erased: rg.ann.map((a, i) => [i, a]) }); rg.ann = []; }
+      else { const h = marks.pop(); if (h && h.erased) { for (const [i, a] of h.erased) rg.ann.splice(i, 0, a); } else rg.ann.pop(); }
+      paint(); touch(); commit();
+    }
   });
+  e._clear = () => { if (rg.ann.length) { marks.push({ erased: rg.ann.map((a, i) => [i, a]) }); rg.ann = []; paint(); touch(); commit(); } };
   fig.addEventListener('pointerdown', ev => {
-    if (tool === 'move' || ev.button > 0) return;
+    const use = toolFor(ev);
+    if (use === 'move' || ev.button > 0) return;
+    if (ev.pointerType === 'touch' && S.penSeen) return;              // palm rejection: once a stylus is used, fingers do not draw
     ev.preventDefault(); ev.stopPropagation(); setActive(rg.id, false);
     const [x, y] = pt(ev);
-    if (tool === 'label') {
+    try { fig.setPointerCapture(ev.pointerId); } catch (err) { /* older browsers */ }
+    if (use === 'erase') {
+      const erased = [], r = 14 * 1000 / Math.max(1, svg.getBoundingClientRect().width);
+      const rub = m => {
+        const [a, b] = pt(m); ring = { x: a, y: b, r };
+        for (let i = rg.ann.length - 1; i >= 0; i--) if (annHit(rg.ann[i], a, b, r)) erased.push([i, rg.ann.splice(i, 1)[0]]);
+        paint();
+      };
+      const up = () => { fig.removeEventListener('pointermove', rub); fig.removeEventListener('pointerup', up); fig.removeEventListener('pointercancel', up); ring = null; paint(); if (erased.length) { marks.push({ erased: erased.sort((p, q) => p[0] - q[0]) }); touch(); commit(); } };
+      rub(ev); fig.addEventListener('pointermove', rub); fig.addEventListener('pointerup', up); fig.addEventListener('pointercancel', up);
+      return;
+    }
+    if (use === 'label') {
       const r = fig.getBoundingClientRect(), inp = el('<input class="lbl" type="text" aria-label="Label text" placeholder="Label">');
       inp.style.left = ev.clientX - r.left + 'px'; inp.style.top = ev.clientY - r.top - 14 + 'px'; fig.append(inp); setTimeout(() => inp.focus(), 0);
       let done = false; const fin = keep => { if (done) return; done = true; const s = inp.value.trim(); inp.remove(); if (keep && s) { rg.ann.push({ t: 'text', c: col, x, y: y + 16, s: s.slice(0, 120) }); paint(); touch(); commit(); } };
@@ -355,13 +396,19 @@ function buildImage(rg) {
       inp.addEventListener('blur', () => fin(true)); inp.addEventListener('pointerdown', k => k.stopPropagation());
       return;
     }
-    live = tool === 'pen' ? { t: 'pen', c: col, p: [x, y] } : { t: 'arrow', c: col, p: [x, y, x, y] }; paint();
-    try { fig.setPointerCapture(ev.pointerId); } catch (err) { /* older browsers */ }
-    const mv = m => { const [a, b] = pt(m); if (live.t === 'pen') { const n = live.p.length; if (Math.hypot(a - live.p[n - 2], b - live.p[n - 1]) > 4 && n < 4000) live.p.push(a, b); } else { live.p[2] = a; live.p[3] = b; } paint(); };
-    const up = () => { fig.removeEventListener('pointermove', mv); fig.removeEventListener('pointerup', up); fig.removeEventListener('pointercancel', up); if (live && (live.t === 'pen' || Math.hypot(live.p[2] - live.p[0], live.p[3] - live.p[1]) > 12)) rg.ann.push(live); live = null; paint(); touch(); commit(); };
+    live = use === 'pen' ? { t: 'pen', c: col, p: [x, y] } : { t: 'arrow', c: col, p: [x, y, x, y] }; paint();
+    const gap = ev.pointerType === 'pen' ? 2 : 4;   // a stylus sends many more points, so keep finer detail
+    const mv = m => {
+      if (live.t === 'pen') {
+        const evs = m.getCoalescedEvents ? m.getCoalescedEvents() : [];
+        for (const q of evs.length ? evs : [m]) { const [a, b] = pt(q), n = live.p.length; if (Math.hypot(a - live.p[n - 2], b - live.p[n - 1]) > gap && n < 6000) live.p.push(a, b); }
+      } else { const [a, b] = pt(m); live.p[2] = a; live.p[3] = b; }
+      paint();
+    };
+    const up = () => { fig.removeEventListener('pointermove', mv); fig.removeEventListener('pointerup', up); fig.removeEventListener('pointercancel', up); if (live && (live.t === 'pen' || Math.hypot(live.p[2] - live.p[0], live.p[3] - live.p[1]) > 12)) { rg.ann.push(live); marks.push({ add: true }); } live = null; paint(); touch(); commit(); };
     fig.addEventListener('pointermove', mv); fig.addEventListener('pointerup', up); fig.addEventListener('pointercancel', up);
   });
-  grab(fig, rg, () => setActive(rg.id, false), () => tool === 'move');
+  grab(fig, rg, () => setActive(rg.id, false), ev => toolFor(ev) === 'move');
   return e;
 }
 function readImage(file) {                  // -> {src, w, h}; large photos are scaled down so worksheets stay small
@@ -478,8 +525,12 @@ function regionTex(rg) {
   return rg.type === 'text' ? rg.src : '';
 }
 function regionMenu(rg, anchor) {
-  const id = rg.id, r = S.results.get(id);
+  const id = rg.id, r = S.results.get(id), e = els.get(id), P = plots.get(id);
+  const extra = rg.type === 'image' ? ['-', ...['pen', 'arrow', 'label', 'erase'].map(t => ({ label: { pen: 'Draw with the pen', arrow: 'Draw an arrow', label: 'Add a label', erase: 'Erase marks' }[t], act: () => { setActive(id, false); e._setTool(t); } })), { label: 'Clear all marks', act: () => e._clear() }]
+    : rg.type === 'plot' && rg.anim !== 'none' && P && P.data ? ['-', { label: P.playing ? 'Pause' : 'Play', act: () => play(P, !P.playing) }]
+    : rg.type === 'math' || rg.type === 'text' ? ['-', { label: 'Edit', act: () => setActive(id, true) }] : [];
   openMenu(anchor, [
+    ...extra.slice(1), '-',
     ...(FREE ? [] : [{ label: 'Move up', act: () => moveInColumn(id, -1) }, { label: 'Move down', act: () => moveInColumn(id, 1) }]),
     { label: 'Duplicate', act: () => { const { id: _, side: __, ...copy } = JSON.parse(JSON.stringify(rg)); const n = insertRegion(copy, FREE ? { x: rg.x + 24, y: rg.y + 24 } : { x: rg.x, y: rg.y + els.get(id).offsetHeight + 8, room: true }); setActive(n.id, false); commit(); } },
     ...(rg.type === 'math' ? ['-', { label: 'Copy as LaTeX', act: () => copyText(regionTex(rg), 'LaTeX') }, { label: 'Copy the answer', act: () => copyText(r && r.text || '', 'Answer') }, { label: 'Copy what I typed', act: () => copyText(rg.src, 'Line') }] : []),
@@ -496,7 +547,7 @@ $('#desk').addEventListener('pointerdown', e => { if (e.target === $('#desk') ||
 
 // ---------- calculating and painting ----------
 let rcT = 0, olT = 0;
-const recalcSoon = () => { clearTimeout(rcT); rcT = setTimeout(recalc, 60); };
+const recalcSoon = () => { clearTimeout(rcT); rcT = setTimeout(recalc, 20); };
 const outlineSoon = () => { clearTimeout(olT); olT = setTimeout(outline, 250); };
 const stamp = ok => `<span class="stamp ${ok ? 'ok' : 'ng'}" title="${ok ? 'This is true' : 'This is false'}">${ok ? 'OK' : 'NG'}</span>`;
 function paintMath(rg, e) {
@@ -518,7 +569,8 @@ function paintMath(rg, e) {
       }
     }
   }
-  view.innerHTML = h; msg.hidden = !m; msg.className = 'msg' + (note ? ' note' : ''); msg.innerHTML = m;
+  const sig = h + '\u0001' + m + (note ? 1 : 0);
+  if (e._sig !== sig) { e._sig = sig; view.innerHTML = h; msg.hidden = !m; msg.className = 'msg' + (note ? ' note' : ''); msg.innerHTML = m; }
   e.classList.toggle('bad', !!(r && r.err));
 }
 rgsEl.addEventListener('click', e => { if (e.target.closest('[data-adv]')) solverMenu($('#b-solver').offsetParent ? $('#b-solver') : $('#b-more')); });
@@ -647,7 +699,8 @@ function hover(P, ev) {
 function syncAnim(P) {
   const d = P.data, box = P.el.querySelector('.anim'), mode = P.rg.anim;
   box.hidden = !d || mode === 'none'; if (box.hidden) return;
-  const b = box.querySelector('.play'); b.innerHTML = ic(P.playing ? 'pause' : 'play'); b.setAttribute('aria-label', P.playing ? 'Pause' : 'Play');
+  const b = box.querySelector('.play'), want = P.playing ? 'pause' : 'play';
+  if (b.dataset.icon !== want) { b.dataset.icon = want; b.innerHTML = ic(want); b.setAttribute('aria-label', P.playing ? 'Pause' : 'Play'); }   // rebuilding it every frame swallowed clicks
   box.querySelector('input').value = Math.round(P.frac * 1000);
   const [nm, v, u] = mode === 'param' ? [d.pv, d.p0 + (d.p1 - d.p0) * P.frac, d.pu] : [d.xv, d.a + (d.b - d.a) * P.frac, d.xu];
   box.querySelector('output').textContent = `${nm} = ${short(v / u.f)}${u.text ? ' ' + u.text : ''}`;
@@ -749,7 +802,7 @@ $('#f-open').addEventListener('change', async e => {
   try { const doc = cleanDoc(JSON.parse(await f.text())); replaceDoc(() => loadDoc(doc, true)); }
   catch (err) { toast('That file is not an iCalPad worksheet.'); }
 });
-$('#f-img').addEventListener('change', e => { const fs = [...e.target.files]; e.target.value = ''; if (fs.length) addPictures(fs); });
+$('#f-img').addEventListener('change', e => { const fs = [...e.target.files], at = S.pendingAt; e.target.value = ''; S.pendingAt = null; if (fs.length) addPictures(fs, at || undefined); });
 const exampleItems = () => EXAMPLES.map(x => ({ label: x.name, note: x.note, act: () => replaceDoc(() => loadDoc(docFrom(x.s, x.title), true)) }));
 function pasteText(text, at) {              // each pasted line becomes a math line when it reads as math, otherwise a note
   const lines = text.replace(/\r/g, '').split('\n').map(l => l.trim().replace(/^\$\$?|\$\$?$/g, '').replace(/^\\\[|\\\]$/g, '').replace(/^\\\(|\\\)$/g, '').trim()).filter(Boolean).slice(0, 60);
@@ -913,6 +966,44 @@ document.addEventListener('keydown', e => {
   }
 });
 let wasFree = FREE;
+/* Right-click opens iCalPad's own menu. Text boxes keep the browser's menu (spelling, copy, paste),
+   and Shift + right-click always gives the browser's menu. */
+const pointAnchor = (x, y) => ({ getBoundingClientRect: () => ({ left: x, right: x, top: y, bottom: y, width: 0, height: 0 }), contains: () => false, hasAttribute: () => false, setAttribute() { /* not a button */ } });
+async function pasteHere(at) {
+  try {
+    if (navigator.clipboard && navigator.clipboard.read) {
+      const items = await navigator.clipboard.read(), imgs = [];
+      for (const it of items) { const t = it.types.find(x => /^image\/(png|jpeg|gif|webp)$/.test(x)); if (t) imgs.push(await it.getType(t)); }
+      if (imgs.length) { addPictures(imgs, at); return; }
+    }
+    const t = await navigator.clipboard.readText();
+    if (t && t.trim()) pasteText(t, at); else toast('The clipboard is empty.');
+  } catch (e) { toast('This browser blocked reading the clipboard. Press Ctrl+V (⌘V on a Mac) to paste.'); }
+}
+desk.addEventListener('contextmenu', e => {
+  if (e.shiftKey || e.target.closest('input, textarea, select, .menu')) return;
+  e.preventDefault();
+  const anchor = pointAnchor(e.clientX, e.clientY), rgEl = e.target.closest('.rg');
+  if (rgEl && region(rgEl.dataset.id)) { const rg = region(rgEl.dataset.id); if (S.active !== rg.id) setActive(rg.id, false); regionMenu(rg, anchor); return; }
+  let at;
+  if (FREE && e.target.closest('#rgs')) { const p = canvasPt(e); at = { x: Math.max(0, snap(p.x - 4)), y: Math.max(0, snap(p.y - 20)), room: false }; setActive(null); setCursor(at); }
+  const here = FREE && at ? ' here' : '';
+  openMenu(anchor, [
+    { label: 'Add math' + here, act: () => addRegion('math', at ? { at } : {}) },
+    { label: 'Add a note' + here, act: () => addRegion('text', at ? { at } : {}) },
+    { label: 'Add a plot' + here, act: () => addRegion('plot', at ? { at } : {}) },
+    { label: 'Add a picture' + here + '…', act: () => { S.pendingAt = at || null; $('#f-img').click(); } },
+    { label: 'Add a sketch' + here, act: () => addRegion('sketch', at ? { at } : {}) },
+    '-',
+    ...(navigator.clipboard && navigator.clipboard.readText ? [{ label: 'Paste' + here, kbd: 'Ctrl V', act: () => pasteHere(at) }] : []),
+    { label: 'Undo', kbd: 'Ctrl Z', act: undo }, { label: 'Redo', act: redo },
+    '-',
+    { label: 'Copy the page as LaTeX', act: () => copyText(latexDoc(), 'LaTeX') },
+  ]);
+});
+/* A stylus such as Apple Pencil: draws on a selected picture, and fingers no longer draw (palm rejection). */
+function markPen() { if (!S.penSeen) { S.penSeen = true; document.body.classList.add('pen-mode'); } }
+for (const t of ['pointerdown', 'pointermove']) document.addEventListener(t, e => { if (e.pointerType === 'pen') markPen(); }, { capture: true, passive: true });
 window.addEventListener('resize', () => { closeMenu(); if (!narrow() !== wasFree) { wasFree = !narrow(); renderAll(); } });
 if (window.ResizeObserver) new ResizeObserver(() => { for (const P of plots.values()) draw(P); }).observe($('#sheet'));
 
