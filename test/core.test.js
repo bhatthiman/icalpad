@@ -214,11 +214,12 @@ t(['y(x) := a*x^2', 'a := 3', 'y(2) ='], '12', 'late binding');
 t(['M(x) := w*L*x/2 - w*x^2/2', 'th(x) := int(M(x), x)/EI + C_1', 'y(x) := int(th(x), x) + C_2', 'c := solve([y(0) = 0, y(L) = 0], [C_1, C_2]) ->', 'd(x) := subs(y(x), C_1, c[1], C_2, c[2]) -> simplify', 'd(L/2) ->'], '-5*L^4*w/(384*EI)');
 t(['M(x) := w*L*x/2 - w*x^2/2', 'th(x) := int(M(x), x)/EI + C_1', 'y(x) := int(th(x), x) + C_2', 'c := solve([y(0) = 0, y(L) = 0], [C_1, C_2]) ->', 'd(x) := subs(y(x), C_1, c[1], C_2, c[2]) -> simplify', 'w := 12 kN/m', 'L := 6 m', 'EI := 200 GPa * 8500 cm^4', 'd(L/2) = mm'], '-11.91 mm');
 t(['K := [600, -200; -200, 200] kN/m', 'Mm := [20, 0; 0, 10] tonne', 'lam := eigenvals(inv(Mm)*K)', 'sqrt(lam[1]) ='], /1\/s/);
-// Substitution must not merge adjacent numeric factors (2 * v0 -> 2·25 m/s).
+// Projectile-motion example: explicit multiplication must retain its dot
+// after v_0 is substituted with the numeric quantity 25 m/s.
 {
-  const r = last(['v0 := 25 m/s', 'θ := 40 deg', 'g := 9.81 m/s^2', 'tf := 2v0*sin(θ)/g =']);
+  const r = last(['v_0 := 25 m/s', 'theta := 40 deg', 't_f := 2*v_0*sin(theta)/g = s']);
   const ok = !r.err && !!r.subTex && /2\\cdot\s*25/.test(r.subTex) && !/225/.test(r.subTex);
-  if (ok) pass++; else { fail++; console.log('FAIL numeric factor separator in substituted formula\\n   got: ' + JSON.stringify({ err: r.err, subTex: r.subTex, text: r.text })); }
+  if (ok) pass++; else { fail++; console.log('FAIL projectile-motion substitution separator\\n   got: ' + JSON.stringify({ err: r.err, subTex: r.subTex, text: r.text })); }
 }
 
 // substituted-value display (the numeric answer remains unchanged)
