@@ -231,8 +231,8 @@ t(['P := 2 MPa', 'D := 1000 mm', 't := 12 mm', 'sigma_h := P*D/(2*t) ='], '83.33
   if (!r.subTex) pass++; else { fail++; console.log('FAIL unexpected substitution line: ' + r.subTex); }
 }
 
-// Unit conversion uses the value and substituted expression captured when
-// the variable was first evaluated, even if its inputs are later redefined.
+// Unit conversion uses the stored numeric result and displays an explicit
+// conversion factor, even if the original inputs are later redefined.
 {
   const r = last([
     'P := 2 MPa', 'D := 1000 mm', 't := 12 mm',
@@ -241,10 +241,11 @@ t(['P := 2 MPa', 'D := 1000 mm', 't := 12 mm', 'sigma_h := P*D/(2*t) ='], '83.33
     'sigma_h = psi'
   ]);
   const ok = !r.err && !!r.subTex &&
-    ['2', '1000', '12', 'MPa', 'mm'].every(x => r.subTex.includes(x)) &&
+    /83\\.33/.test(r.subTex) && /MPa/.test(r.subTex) &&
+    /145\\.038/.test(r.subTex) && /psi/.test(r.subTex) &&
     !/\\b(P|D|t|sigma_h)\\b/.test(r.subTex) &&
-    /psi/.test(r.text) && /12086/.test(r.text);
-  if (ok) pass++; else { fail++; console.log('FAIL conversion should use the stored value and definition-time expression\\n   got: ' + JSON.stringify({ err: r.err, subTex: r.subTex, text: r.text })); }
+    /12086/.test(r.text);
+  if (ok) pass++; else { fail++; console.log('FAIL conversion should use stored result and factor\\n   got: ' + JSON.stringify({ err: r.err, subTex: r.subTex, text: r.text })); }
 }
 // A conversion line should start from the stored displayed result, not
 // repeat the original equation that produced it.
