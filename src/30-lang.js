@@ -582,6 +582,34 @@ function showNumeric(c, unitRaw) {          // canonical value -> {tex, text, ch
   throw new CalcError('This could not be worked out to a number');
 }
 
+// Expand previously defined variables for a readable, unit-preserving substitution line.
+function expandDisplayExpr(x, scope, seen = new Set()) {
+  if (!x || typeof x !== 'object') return x;
+  if (x.t === 'sym') {
+    const entry = scope.get(x.name);
+    // Prefer the expression snapshot captured when this value was defined.
+    // Unresolved names remain symbols and can still use the worksheet's late binding.
+    const source = entry && (entry.displayExpr || entry.expr);
+    if (entry && !entry.fn && source && !seen.has(x.name)) {
+      const next = new Set(seen); next.add(x.name);
+      return expandDisplayExpr(source, scope, next);
+    }
+    return { ...x };
+  }
+  if (Array.isArray(x)) return x.map(v => expandDisplayExpr(v, scope, seen));
+  const out = {};
+  for (const [k, v] of Object.entries(x)) out[k] = expandDisplayExpr(v, scope, seen);
+  return out;
+}
+
+// Expand defined variables even when the line is a unit conversion.
+// The substitution keeps the source units; showNumeric formats the final value
+// in the requested target unit.
+function substitutedDisplayTex(expr, scope) {
+  const expanded = expandDisplayExpr(expr, scope);
+  return tex(expanded) !== tex(expr) ? '= ' + tex(expanded) : '';
+}
+
 // ---------- running a worksheet ----------
 const SHAPERS = new Set(['factor', 'expand', 'apart', 'collect', 'ratsimp', 'simplify', 'taylor', 'float', 'coeffs']);
 const ARROW = kw => kw ? `\\xrightarrow{\\text{${kw}}}` : '\\rightarrow ';
@@ -614,16 +642,23 @@ function runStatement(st, scope) {
       scope.set(name, { fn: true, params, body });
       return { kind: 'def', name, params, tex: lt + '\\mathrel{:=}' + inTex, res: extra, text, hint: unevaluated(body) };
     }
-    let v = ev(expr, env), extra = '', text = '', check;
+    let v = ev(expr, env), extra = '', text = '', check, subTex = '';
     if (st.show === 'sym') { const s = symbolic(v); v = s.r; extra = ARROW(s.kw) + toTex(v); text = toText(v); }
-    else if (st.show === 'num') { const s = showNumeric(v, st.unit); extra = '=' + s.tex; text = s.text; check = s.check; }
-    scope.set(name, { v });
-    return { kind: 'def', name, value: v, tex: lt + '\\mathrel{:=}' + inTex, res: extra, text, check, hint: unevaluated(v) };
+    else if (st.show === 'num') {
+      subTex = substitutedDisplayTex(expr, scope);
+      const s = showNumeric(v, st.unit); extra = '=' + s.tex; text = s.text; check = s.check;
+    }
+    // Keep the display expansion as a definition-time snapshot. Later unit
+    // conversions reuse this expression and the already evaluated value.
+    const displayExpr = expandDisplayExpr(expr, scope);
+    scope.set(name, { v, expr, displayExpr });
+    return { kind: 'def', name, value: v, tex: lt + '\\mathrel{:=}' + inTex, subTex, res: extra, text, check, hint: unevaluated(v) };
   }
   if (kind === 'eval') {
     if (st.show === 'sym') { const s = symbolic(st.mod && (BIND[KW[st.mod.kw] || st.mod.kw]) ? ZERO : ev(expr, env)); return { kind: 'sym', value: s.r, tex: inTex, res: ARROW(s.kw) + toTex(s.r), text: toText(s.r), hint: unevaluated(s.r) }; }
     const v = ev(expr, env), s = showNumeric(v, st.unit);
-    return { kind: 'eval', value: v, tex: inTex, res: '=' + s.tex, text: s.text, check: s.check };
+    const subTex = substitutedDisplayTex(expr, scope);
+    return { kind: 'eval', value: v, tex: inTex, subTex, res: '=' + s.tex, text: s.text, check: s.check };
   }
   // a bare expression: show a value when there is one
   const v = ev(expr, env);
