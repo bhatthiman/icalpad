@@ -20,7 +20,8 @@ I was tired of paying for software, especially symbolic calculators. Tools such 
 - **Exact symbolic answers.** End a line with `->` to simplify, expand, factor, differentiate, integrate, solve, take limits and series.
 - **LaTeX in and out.** Paste LaTeX and it becomes live math. Copy any line, or the whole page, as LaTeX for a paper or report.
 - **Plots you can animate.** Sweep a value over time or trace a curve as it is drawn.
-- **Pictures with markup.** Drop or paste a photo of a problem, then draw arrows, scribbles and labels on it.
+- **Pictures with markup.** Drop or paste a photo of a problem, then draw arrows, scribbles and labels on it, and erase marks you don't want. Apple Pencil and other styluses draw directly on a selected picture.
+- **Its own right-click menu.** Right-click anywhere to add math, notes, plots or pictures at that spot, paste, or copy LaTeX. Shift + right-click still opens the browser's menu.
 
 ## See it in action
 
