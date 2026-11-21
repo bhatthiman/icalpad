@@ -171,7 +171,9 @@ const HELP = [
   ['Working on the page', [
     ['Click an empty spot, then type', 'Start a math line right there'],
     ['Drag a line, or its handle', 'Move it anywhere. Lines are read top to bottom, then left to right'],
-    ['Drop or paste a picture', 'It lands where you drop it. Select it to draw on it'],
+    ['Drop or paste a picture', 'It lands where you drop it. Select it to draw on it with the pen, arrow, label or eraser'],
+    ['Apple Pencil or another stylus', 'Select a picture, then just draw. Fingers scroll, and the stylus eraser end erases'],
+    ['Right-click', 'iCalPad\'s own menu: add things at that spot, paste, copy as LaTeX. Shift + right-click gives the browser\'s menu'],
     ['Paste LaTeX', 'On an empty spot it becomes a math line'],
   ]],
   ['Define and calculate', [
