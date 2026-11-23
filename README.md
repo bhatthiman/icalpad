@@ -54,7 +54,7 @@ Add a photo or screenshot of a problem, draw on it with the pen, arrow and label
 
 Open **Assistant**, add your own Anthropic API key, and type a problem or drop in a photo, a screenshot or a PDF page. The assistant writes headings, givens with units, equations and result lines through the same commands the page uses. Every number on the page is computed by iCalPad, not typed by the model. Each reply lists what it changed and has an **Undo AI changes** button.
 
-![The assistant turning handwritten notes into a worksheet, with the photo attached for comparison](docs/media/ai-handwritten.png)
+![The assistant turning a photo of handwritten notes into a worksheet, then setting up and solving a beam deflection check](docs/media/assistant.gif)
 
 It has two modes. **Neat up** converts what you give it and adds nothing. **Set up and solve** writes the givens, assumptions, equations, results and a check.
 
