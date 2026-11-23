@@ -19,6 +19,7 @@
   --cond: "Barlow Semi Condensed", "Barlow", "Arial Narrow", system-ui, sans-serif;
   --math: "STIX Two Text", "STIX Two Math", "Cambria Math", Cambria, "Times New Roman", serif;
   --shadow: 0 1px 2px rgba(23, 38, 43, .08), 0 8px 24px rgba(23, 38, 43, .10);
+  --note-bg: rgba(154, 95, 6, .07);
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
@@ -27,6 +28,7 @@
     --rule: #33454A; --rule2: #243235; --pen: #A3B9FF; --pen-soft: #1D2947; --ok: #5FCB8F; --ng: #FF857D; --warn: #E3B04B;
     --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181; --c6: #0ca30c;
     --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 28px rgba(0, 0, 0, .45);
+    --note-bg: rgba(227, 176, 75, .09);
     color-scheme: dark;
   }
 }
@@ -35,6 +37,7 @@
   --rule: #33454A; --rule2: #243235; --pen: #A3B9FF; --pen-soft: #1D2947; --ok: #5FCB8F; --ng: #FF857D; --warn: #E3B04B;
   --c1: #3987e5; --c2: #d95926; --c3: #199e70; --c4: #c98500; --c5: #d55181; --c6: #0ca30c;
   --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 10px 28px rgba(0, 0, 0, .45);
+  --note-bg: rgba(227, 176, 75, .09);
   color-scheme: dark;
 }
 
@@ -177,6 +180,14 @@ svg.ic { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-wid
 .rg.text code { font: 13px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: var(--rule2); padding: 1px 5px; border-radius: 4px; color: var(--ink); overflow-wrap: anywhere; }
 .rg.text .mx { font-size: 1.1em; color: var(--ink); }
 .flow .rg.text h1 { margin-top: 12px; } .flow .rg.text h2 { margin-top: 14px; }
+.rg.text.note .view { border-left: 3px solid var(--warn); background: var(--note-bg); padding: 4px 10px; border-radius: 0 4px 4px 0; }
+.rg.text.note p { color: var(--ink); }
+.srcbar { display: flex; align-items: center; gap: 8px; padding: 2px 0 4px; font: 500 13px/1.2 var(--cond); color: var(--ink2); }
+.srcbar .btn { height: 26px; padding: 0 8px; font: 500 12.5px var(--ui); }
+.rg.image.folded .fig, .rg.image.folded .itools { display: none !important; }
+.ai-flash > .body { animation: aiflash 2.6s ease-out; }
+@keyframes aiflash { 0%, 35% { background: var(--pen-soft); box-shadow: 0 0 0 3px var(--pen-soft); } 100% { background: transparent; box-shadow: 0 0 0 3px transparent; } }
+.help .ver { margin: 14px 0 0; font-size: 12.5px; color: var(--ink3); }
 textarea.tsrc { display: block; width: 100%; min-height: 40px; padding: 8px 10px; border: 1px solid var(--rule); border-radius: 6px; background: var(--paper); resize: none; overflow: hidden; line-height: 1.45; }
 
 /* pictures and sketches */
@@ -306,7 +317,78 @@ a { color: var(--pen); }
 .mx .ol { border-top: 1.1px solid currentColor; } .mx .ul { border-bottom: 1.1px solid currentColor; } .mx .bx { border: 1.1px solid currentColor; padding: .1em .3em; }
 
 /* ---------- small screens ---------- */
+
+/* ---------- the optional AI assistant panel (docked right; a full-screen sheet on phones) ---------- */
+.aip { width: 384px; flex: none; display: flex; flex-direction: column; min-height: 0; background: var(--chrome); border-left: 1px solid var(--rule); }
+.aip.drop { box-shadow: inset 0 0 0 2px var(--pen); }
+.aip-hd { display: flex; align-items: center; gap: 2px; padding: 8px 8px 8px 14px; border-bottom: 1px solid var(--rule); }
+.aip-hd h2 { font: 600 15px/1 var(--cond); margin: 0; }
+.aip-mode { display: flex; margin: 10px 12px 4px; border: 1px solid var(--rule); border-radius: 7px; background: var(--paper); padding: 2px; }
+.aip-mode button { flex: 1; border: 0; background: none; height: 30px; border-radius: 5px; font-weight: 500; font-size: 14px; color: var(--ink2); }
+.aip-mode button[aria-checked="true"] { background: var(--pen-soft); color: var(--pen); }
+.aip-log { flex: 1; overflow: auto; padding: 10px 12px 14px; display: flex; flex-direction: column; gap: 12px; min-height: 0; }
+.aip-empty { color: var(--ink2); font-size: 14px; }
+.aip-empty p { margin: 0 0 9px; }
+.aip-empty b { color: var(--ink); font-weight: 600; }
+.am { font-size: 14.5px; line-height: 1.45; overflow-wrap: anywhere; }
+.am.user { align-self: flex-end; max-width: 88%; background: var(--paper); border: 1px solid var(--rule); border-radius: 10px 10px 2px 10px; padding: 7px 11px; white-space: pre-wrap; }
+.am.user .att { display: flex; flex-wrap: wrap; gap: 6px; }
+.am.user .att:not(:empty) { margin-bottom: 6px; }
+.am.user .att img { height: 72px; max-width: 160px; object-fit: cover; border-radius: 5px; border: 1px solid var(--rule2); }
+.am.user .pdf { font-size: 12.5px; color: var(--ink2); border: 1px solid var(--rule); border-radius: 5px; padding: 2px 7px; }
+.am.bot { border-left: 2px solid var(--pen); padding: 1px 0 1px 11px; }
+.am.bot .tx p { margin: 0 0 7px; }
+.am.bot .tx ul { margin: 0 0 7px; padding-left: 18px; }
+.am.bot .tx h1, .am.bot .tx h2, .am.bot .tx h3 { font: 600 15px/1.3 var(--cond); margin: 8px 0 4px; }
+.am.bot .tx code { font-size: 13px; background: var(--rule2); padding: 0 4px; border-radius: 3px; }
+.am.bot .tx .mx { font-family: var(--math); }
+.am .muted, .am .st { color: var(--ink3); font-size: 13px; }
+.am .st:empty { display: none; }
+.am .acts { margin-top: 6px; font-size: 13px; }
+.am .acts summary { cursor: pointer; color: var(--ink2); font-weight: 500; }
+.am .acts ol { margin: 5px 0 0; padding-left: 20px; color: var(--ink2); max-height: 260px; overflow: auto; }
+.am .acts li { cursor: pointer; padding: 1px 0; }
+.am .acts li:hover code { color: var(--pen); }
+.am .acts code { font-size: 12.5px; color: var(--ink); }
+.am .err { margin-top: 6px; padding: 7px 10px; border-radius: 6px; background: var(--note-bg); border-left: 3px solid var(--ng); font-size: 13.5px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.am .err p { margin: 0; flex-basis: 100%; }
+.am .err .btn, .am .ft .btn { height: 28px; font-size: 13px; padding: 0 9px; }
+.am .ft { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 6px; }
+.am .use { font-size: 12px; color: var(--ink3); }
+.aip-in { border-top: 1px solid var(--rule); padding: 8px 12px 10px; }
+.aip-att { display: flex; flex-wrap: wrap; gap: 6px; }
+.aip-att:not(:empty) { margin-bottom: 6px; }
+.aip-chip { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; border: 1px solid var(--rule); background: var(--paper); border-radius: 6px; padding: 3px 4px 3px 3px; font-size: 12.5px; }
+.aip-chip img { width: 30px; height: 30px; object-fit: cover; border-radius: 3px; }
+.aip-chip b { font-size: 11px; padding: 0 4px; color: var(--ink2); }
+.aip-chip .nm { max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.aip-chip .x { border: 0; background: none; width: 22px; height: 22px; border-radius: 4px; font-size: 16px; line-height: 1; color: var(--ink2); }
+.aip-chip .x:hover { background: var(--rule2); }
+.aip-box { border: 1px solid var(--rule); border-radius: 8px; background: var(--paper); }
+.aip-box:focus-within { border-color: var(--pen); }
+.aip-box textarea { display: block; width: 100%; border: 0; background: none; resize: none; padding: 8px 10px 2px; min-height: 52px; max-height: 220px; outline: none; font-size: 14.5px; }
+.aip-row { display: flex; align-items: center; gap: 6px; padding: 2px 4px 4px; }
+.aip-row .btn.solid, .aip-row .btn.line { height: 30px; }
+.aip-hint { font-size: 11.5px; color: var(--ink3); }
+.aip-note { margin: 7px 0 0; font-size: 11.5px; line-height: 1.35; color: var(--ink3); }
+.aip-setup { flex: 1; overflow: auto; padding: 14px; font-size: 14px; color: var(--ink2); }
+.aip-setup h3 { font: 600 16px/1.2 var(--cond); color: var(--ink); margin: 0 0 10px; }
+.aip-setup p { margin: 0 0 10px; }
+.aip-setup a { color: var(--pen); }
+.aip-setup .fld { display: block; margin: 12px 0; }
+.aip-setup .fld span { display: block; font-weight: 500; color: var(--ink); margin-bottom: 4px; }
+.aip-setup input[type=password], .aip-setup select { width: 100%; height: 36px; border: 1px solid var(--rule); border-radius: 6px; background: var(--paper); padding: 0 9px; }
+.aip-setup .chk { display: flex; align-items: center; gap: 8px; color: var(--ink); font-weight: 500; margin-top: 4px; }
+.aip-setup .chk input { width: 17px; height: 17px; accent-color: var(--pen); }
+.aip-small { font-size: 12.5px; color: var(--ink3); margin-top: 4px !important; }
+.aip-warn { color: var(--ink); background: var(--note-bg); border-left: 3px solid var(--warn); padding: 6px 9px; border-radius: 0 5px 5px 0; }
+.aip-btns { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0; }
+.aip.busy .aip-hint { visibility: hidden; }
+#b-ai[aria-pressed="true"] { background: var(--pen-soft); color: var(--pen); }
+
 @media (max-width: 860px) {
+  .aip { position: fixed; z-index: 36; inset: 0; width: auto; border-left: 0; }
+  .aip-hint { display: none; }
   .side { position: fixed; z-index: 35; top: 0; bottom: 0; left: 0; width: min(330px, 88vw); box-shadow: var(--shadow); }
   .side.closed { display: none; }
   .drawer-scrim { position: fixed; inset: 0; z-index: 34; background: rgba(10, 18, 20, .45); }
@@ -335,7 +417,8 @@ a { color: var(--pen); }
 @media (prefers-reduced-motion: reduce) { .desk { scroll-behavior: auto; } .chip.busy .dot { animation: none; } }
 @media print {
   body { overflow: visible; background: #fff; } html, body, #app { height: auto; display: block; }
-  .top, .side, .status, .mbar, .edit, .hdl, .rz, .cross, .blank, .anim, .menu, .toast { display: none !important; }
+  .top, .side, .status, .mbar, .edit, .hdl, .rz, .cross, .blank, .anim, .menu, .toast, .aip, .srcbar .btn { display: none !important; }
+  .rg.text.note .view { background: none; }
   .rgs.free { background-image: none; } .free .rg .body { border-color: transparent !important; box-shadow: none !important; }
   .desk { overflow: visible; padding: 0; } .sheet { box-shadow: none; max-width: none; }
   .rg.text.on .view { display: block; } .credit { display: block; }
@@ -3207,6 +3290,7 @@ const IC = {
   erase: '<path d="M8 20h11"/><path d="M5.6 14.4 13.9 6a2 2 0 0 1 2.8 0l2.3 2.3a2 2 0 0 1 0 2.8L10.8 19.3a2 2 0 0 1-1.4.6H8.2a2 2 0 0 1-1.4-.6l-1.2-1.2a2.6 2.6 0 0 1 0-3.7z"/><path d="M9.6 10.4l5 5"/>', arrow: '<path d="M5 19 19 5M10 5h9v9"/>', label: '<path d="M5 6h14M12 6v13M9 19h6"/>',
 };
 const ic = n => `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${IC[n]}</svg>`;
+const APP_VERSION = "1.1.0";
 const LS = {
   get(k) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } },
@@ -3274,7 +3358,9 @@ const typing = () => /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tag
 let cmT = 0, svT = 0, warned = false;
 const snapshot = () => JSON.stringify({ ...S.doc, images: undefined });
 function persist() { if (!DB.set('doc', S.doc) && !LS.set('icalpad.doc', S.doc) && !warned) { warned = true; toast('This worksheet is too large to keep in the browser. Use File, then Save as a file.'); } }
+let batchDepth = 0, batchDirty = false;      // > 0 while the assistant works: its changes become one undo step
 function commit() {
+  if (batchDepth > 0) { batchDirty = true; clearTimeout(cmT); return; }
   clearTimeout(cmT); const s = snapshot();
   if (S.hist[S.hpos] === s) return;
   S.hist = S.hist.slice(0, S.hpos + 1); S.hist.push(s); if (S.hist.length > 120) S.hist.shift();
@@ -3306,9 +3392,11 @@ function cleanDoc(d) {                      // accept only the fields a workshee
       if (typeof src === 'string' && src.length < 12e6 && IMG_OK.test(src)) { key = keys.get(r.img) || 'i' + nid(); keys.set(r.img, key); images[key] = src; }
       const ann = (Array.isArray(r.ann) ? r.ann : []).slice(0, 400).map(a => a && a.t === 'text' ? { t: 'text', c: num(a.c, 0, 4, 0) | 0, x: num(a.x, -200, 1200, 0), y: num(a.y, -200, 5000, 0), s: str(a.s, 120) }
         : a && (a.t === 'pen' || a.t === 'arrow') && Array.isArray(a.p) ? { t: a.t, c: num(a.c, 0, 4, 0) | 0, p: a.p.slice(0, a.t === 'arrow' ? 4 : 4000).map(v => Math.round(num(v, -500, 6000, 0))) } : null).filter(Boolean);
-      return { ...base, type: 'image', img: key, w: num(r.w, 60, 1600, 360), ar: num(r.ar, 0.05, 8, 0.62), ann };
+      const im = { ...base, type: 'image', img: key, w: num(r.w, 60, 1600, 360), ar: num(r.ar, 0.05, 8, 0.62), ann };
+      if (r.ref) { im.ref = true; im.cap = str(r.cap, 120) || 'Source image'; if (r.fold) im.fold = true; }
+      return im;
     }
-    if (r.type === 'text') return { ...base, type: 'text', src: str(r.src), w: num(r.w, 120, 1600, 640) };
+    if (r.type === 'text') { const t = { ...base, type: 'text', src: str(r.src), w: num(r.w, 120, 1600, 640) }; if (r.kind === 'note') t.kind = 'note'; return t; }
     return { ...base, type: 'math', src: str(r.src) };
   });
   return { v: 2, title: str(d.title, 200), by: str(d.by, 80), date: str(d.date, 80), sheet: str(d.sheet, 20), auto, images, regions };
@@ -3446,7 +3534,7 @@ function buildMath(rg) {
 }
 function autosize(ta) { ta.style.height = 'auto'; ta.style.height = Math.max(40, ta.scrollHeight + 2) + 'px'; }
 function buildText(rg) {
-  const e = el(`<section class="rg text" data-id="${rg.id}">${hdlHtml}<div class="body"><div class="view"></div><div class="edit"><textarea class="tsrc" id="in-${rg.id}" rows="1" aria-label="Note" placeholder="Write a note. Start with # for a heading. Put math between $ signs."></textarea></div></div><span class="rz w" title="Drag to change the width"></span></section>`);
+  const e = el(`<section class="rg text${rg.kind === 'note' ? ' note' : ''}" data-id="${rg.id}">${hdlHtml}<div class="body"><div class="view"></div><div class="edit"><textarea class="tsrc" id="in-${rg.id}" rows="1" aria-label="Note" placeholder="Write a note. Start with # for a heading. Put math between $ signs."></textarea></div></div><span class="rz w" title="Drag to change the width"></span></section>`);
   const ta = e.querySelector('.tsrc'), view = e.querySelector('.view'); ta.value = rg.src || '';
   const paintText = () => { view.innerHTML = rg.src.trim() ? Core.mdToHtml(rg.src) : '<p class="ph">Empty note</p>'; };
   e._paint = paintText; paintText();
@@ -3532,6 +3620,13 @@ function buildImage(rg) {
       <button class="btn line" type="button" data-do="undo">Undo mark</button><button class="btn line" type="button" data-do="clear">Clear marks</button>
     </div></div><span class="rz" title="Drag to resize"></span></section>`);
   if (src) e.querySelector('img').src = src;
+  if (rg.ref) {
+    const bar = el(`<div class="srcbar"><span class="cap"></span><button class="btn line" type="button" data-fold></button></div>`), fb = bar.querySelector('[data-fold]');
+    bar.querySelector('.cap').textContent = rg.cap || 'Source image';
+    const syncFold = () => { e.classList.toggle('folded', !!rg.fold); fb.textContent = rg.fold ? 'Show' : 'Hide'; fb.setAttribute('aria-expanded', !rg.fold); };
+    fb.addEventListener('click', () => { rg.fold = !rg.fold; syncFold(); touch(); commit(); fitCanvas(); });
+    e.querySelector('.body').prepend(bar); syncFold();
+  }
   const fig = e.querySelector('.fig'), svg = fig.querySelector('svg'); let tool = 'move', col = src ? 0 : 2, live = null, ring = null;
   const marks = [];                         // this picture's own undo list: {add} or {erased: [[index, mark], ...]}
   const H = () => Math.round(1000 * rg.ar);
@@ -4011,7 +4106,12 @@ desk.addEventListener('dragover', e => { if (e.dataTransfer && [...e.dataTransfe
 desk.addEventListener('drop', e => {
   const dt = e.dataTransfer; if (!dt) return; e.preventDefault();
   const p = canvasPt(e), at = FREE ? { x: Math.max(0, snap(p.x)), y: Math.max(0, snap(p.y)), room: false } : null;
-  const imgs = [...dt.files].filter(f => f.type.startsWith('image/'));
+  const imgs = [...dt.files].filter(f => f.type.startsWith('image/')), ai = window.iCalPad.ai;
+  const forAi = [...dt.files].filter(f => /^image\/(png|jpeg|gif|webp)$/.test(f.type) || f.type === 'application/pdf');
+  if (ai && ai.isOpen() && forAi.length) {
+    openMenu(pointAnchor(e.clientX, e.clientY), [{ label: 'Send to the assistant', act: () => ai.attach(forAi) }, ...(imgs.length ? [{ label: 'Place on the page', act: () => addPictures(imgs, at) }] : [])]);
+    return;
+  }
   if (imgs.length) addPictures(imgs, at); else { const t = dt.getData('text/plain'); if (t && t.trim()) pasteText(t, at); else if (dt.files.length) toast('Only pictures can be dropped onto the page.'); }
 });
 
@@ -4105,7 +4205,9 @@ function settingsMenu(anchor) {
   const opt = (v, cur, label) => `<option value="${v}"${String(v) === String(cur) ? ' selected' : ''}>${label}</option>`;
   openMenu(anchor, [{ html: `<div class="row"><label for="set-sig">Digits shown</label><select id="set-sig">${[3, 4, 5, 6, 8].map(n => opt(n, S.set.sig, n)).join('')}</select></div>
     <div class="row"><label for="set-sys">Units for answers</label><select id="set-sys">${opt('auto', S.set.system, 'Follow the worksheet')}${opt('SI', S.set.system, 'SI')}${opt('US', S.set.system, 'US customary')}</select></div>
-    <div class="row"><label for="set-th">Appearance</label><select id="set-th">${opt('auto', S.set.theme, 'Match my device')}${opt('light', S.set.theme, 'Light')}${opt('dark', S.set.theme, 'Dark')}</select></div>` }], m => {
+    <div class="row"><label for="set-th">Appearance</label><select id="set-th">${opt('auto', S.set.theme, 'Match my device')}${opt('light', S.set.theme, 'Light')}${opt('dark', S.set.theme, 'Dark')}</select></div>
+    <div class="row"><span>AI assistant</span><button class="btn line" type="button" id="set-ai">Set up…</button></div>` }], m => {
+    m.querySelector('#set-ai').addEventListener('click', () => { closeMenu(); if (window.iCalPad.ai) window.iCalPad.ai.openSettings(); });
     const on = (id, f) => m.querySelector(id).addEventListener('change', e => { f(e.target.value); LS.set('icalpad.set', S.set); recalc(); });
     on('#set-sig', v => { S.set.sig = +v; }); on('#set-sys', v => { S.set.system = v; }); on('#set-th', v => { S.set.theme = v; applyTheme(); });
   });
@@ -4113,7 +4215,8 @@ function settingsMenu(anchor) {
 function helpDialog() {
   dialog({ title: 'How iCalPad works', body: `<div class="help">${HELP.map(([h, rows]) => `<h3>${esc(h)}</h3>${rows.map(([c, d]) => `<div class="hr"><code>${esc(c)}</code><span>${esc(d)}</span></div>`).join('')}`).join('')}
     <h3>Keys</h3><div class="hr"><code>Enter</code><span>New line below</span></div><div class="hr"><code>↑ ↓</code><span>Previous or next line</span></div><div class="hr"><code>Esc</code><span>Finish editing</span></div><div class="hr"><code>Alt while dragging</code><span>Move without snapping</span></div>
-    <h3>LaTeX</h3><div class="hr"><code>\\frac{w L^2}{8} =</code><span>Any line can be typed or pasted as LaTeX</span></div><div class="hr"><code>Copy as LaTeX</code><span>In a line's menu, and under File for the whole page</span></div></div>` });
+    <h3>LaTeX</h3><div class="hr"><code>\\frac{w L^2}{8} =</code><span>Any line can be typed or pasted as LaTeX</span></div><div class="hr"><code>Copy as LaTeX</code><span>In a line's menu, and under File for the whole page</span></div>
+    <p class="ver">iCalPad version ${APP_VERSION}</p></div>` });
 }
 
 // ---------- wiring ----------
@@ -4131,7 +4234,7 @@ $('#b-set').addEventListener('click', e => settingsMenu(e.currentTarget));
 $('#b-help').addEventListener('click', helpDialog);
 $('#b-more').addEventListener('click', e => {
   const a = e.currentTarget;
-  openMenu(a, [{ label: 'Add a sketch', act: () => addRegion('sketch') }, { label: 'Redo', act: redo }, '-', ...fileItems(), '-',
+  openMenu(a, [{ label: 'Assistant', act: () => window.iCalPad.ai && window.iCalPad.ai.toggle() }, { label: 'Add a sketch', act: () => addRegion('sketch') }, { label: 'Redo', act: redo }, '-', ...fileItems(), '-',
     { label: Adv.state === 'ready' ? 'Advanced solver is on' : 'Solver…', act: () => setTimeout(() => solverMenu(a), 0) },
     { label: 'How iCalPad works', act: helpDialog }, { label: 'Settings…', act: () => setTimeout(() => settingsMenu(a), 0) }]);
 });
@@ -4208,7 +4311,859 @@ async function start(hot) {
 const hotApi = window.claude && window.claude.hot;
 if (hotApi && hotApi.snapshot) hotApi.snapshot(() => ({ doc: S.doc }));
 if (hotApi && hotApi.ready) hotApi.ready(start); else start((hotApi && hotApi.data) || {});
-window.iCalPad = { state: S, Core, Adv };
+// ---------- command layer: the assistant changes the page only through these, built on the functions the UI uses ----------
+function rebuildRegion(rg) {
+  const old = els.get(rg.id); if (!old) return;
+  if (keysEl.parentElement && old.contains(keysEl)) keysEl.remove();
+  plots.delete(rg.id); const e = build(rg); old.replaceWith(e);
+  if (S.active === rg.id) { e.classList.add('on'); if (rg.type === 'math') e.querySelector('.edit').append(keysEl); }
+}
+function slotBelow(afterId) {                  // where a block written by the assistant goes
+  if (!FREE && S.doc.auto) flowPositions();
+  const a = afterId && region(afterId);
+  if (a) return { x: a.x, y: a.y + els.get(a.id).offsetHeight + 6, room: true };
+  let b = -Infinity; for (const r of S.doc.regions) { const e = els.get(r.id); if (e) b = Math.max(b, r.y + e.offsetHeight); }
+  return { x: 26, y: Number.isFinite(b) ? b + 10 : 14, room: false };
+}
+const Cmd = {
+  regions: () => S.doc.regions,
+  region: id => region(id),
+  results: () => S.results,
+  add(spec, afterId) {
+    const p = slotBelow(afterId);
+    if (spec.type === 'text' && /^#/.test(spec.src || '') && S.doc.regions.length) p.y += 10;
+    return insertRegion(spec, p);
+  },
+  edit(id, patch) { const rg = region(id); if (!rg) return null; Object.assign(rg, patch); rebuildRegion(rg); touch(); recalc(); fitCanvas(); return rg; },
+  move(id, afterId) {
+    const rg = region(id), e = els.get(id); if (!rg) return null;
+    const a = afterId && region(afterId);
+    if (a) { rg.x = a.x; rg.y = a.y + els.get(a.id).offsetHeight + 6; } else { rg.x = 26; rg.y = 14; }
+    makeRoom(rg.x, rg.y, e.offsetHeight + 4, id); place(e, rg);
+    S.doc.auto = false; sortRegions(); touch(); recalc(); fitCanvas(); return rg;
+  },
+  positions() { const p = {}; for (const r of S.doc.regions) p[r.id] = { x: r.x, y: r.y }; return p; },
+  setPositions(map) { let n = 0; for (const r of S.doc.regions) if (map[r.id]) { r.x = map[r.id].x; r.y = map[r.id].y; place(els.get(r.id), r); n++; } if (n) { sortRegions(); touch(); recalc(); fitCanvas(); } },
+  remove(id) { const rg = region(id); if (!rg) return null; const copy = JSON.parse(JSON.stringify(rg)); removeRegion(id); return copy; },
+  restore(copy) { if (!copy || region(copy.id)) return; S.doc.regions.push(copy); rgsEl.append(build(copy)); sortRegions(); touch(); recalc(); fitCanvas(); },
+  evaluate() { recalc(); return S.results; },
+  addImage(src) { const key = 'i' + nid(); S.doc.images[key] = src; return key; },
+  begin() { if (!batchDepth) commit(); batchDepth++; },
+  end() { batchDepth = Math.max(0, batchDepth - 1); if (!batchDepth && batchDirty) { batchDirty = false; commit(); } },
+  flash(ids) {
+    let last = null;
+    for (const id of ids) { const e = els.get(id); if (!e) continue; e.classList.remove('ai-flash'); void e.offsetWidth; e.classList.add('ai-flash'); last = e; setTimeout(() => e.classList.remove('ai-flash'), 2600); }
+    if (last) { const r = last.getBoundingClientRect(), d = $('#desk').getBoundingClientRect(); if (r.top < d.top || r.bottom > d.bottom - 60) last.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+  },
+};
+window.iCalPad = { state: S, Core, Adv, cmd: Cmd, docJson, ui: { toast, dialog, openMenu, closeMenu, pointAnchor, el, esc, narrow } };
+})();
+
+</script>
+<script>
+/* ================= iCalPad assistant: the parts that do not touch the page =================
+   Key storage, the streaming client, the worksheet tools and their checks, and the system prompt.
+   This file runs in the browser and in Node (for the tests). It never contacts Anthropic by itself:
+   a request is only made when the user has opened the assistant, entered a key and sent a message.
+   Rules this code enforces:
+   - iCalPad computes, the model writes. Tools add worksheet blocks; the engine produces every answer.
+   - Everything the model writes goes through Core.parseStatement and Core.evalDoc, like typed input. No eval.
+   - The API key lives in memory, sessionStorage, or (only if the user asks) localStorage. Nowhere else. */
+const AICore = (() => {
+'use strict';
+const SYSTEM_MD = "You are the iCalPad assistant. iCalPad is a free-form math worksheet that runs in the browser. You help the user by writing worksheet content: headings, short text, definitions, equations and result lines. You change the worksheet only through the tools. Everything you write must be valid iCalPad syntax, as described in the syntax guide below.\n\n## iCalPad computes; you write\n\n- Every number or symbolic answer shown on the worksheet must come from iCalPad's engine. Write a result line (for example `M =`, `M = kN*m` or `x ->`) and let iCalPad fill in the answer.\n- Never type a computed value as a literal. Do not write `M := 90 kN*m` or a note that says \"M = 90 kN·m\" for something that is calculated. Only given data (values the user or the source provides) may be typed as numbers.\n- If you want to mention or explain a result in your reply, read it first with `get_result`. Quote it as iCalPad shows it.\n\n## Writing style on the worksheet\n\n- Always attach units to quantities that have them: `w := 20 kN/m`, `L := 6 m`.\n- Use variable names that match the source: `fc'`, `fy`, `As`, `b`, `d`, `M_u`, `sigma_y`. Keep the user's symbols; do not rename them for style.\n- Givens are definitions with `:=`. Derived quantities are definitions too (`M := w*L^2/8`), followed by a result line (`M =`) where the value should be shown.\n- Headings are short. Text blocks are one or two plain sentences. Use a note block to flag something the user should look at.\n- Write blocks in calculation order: a block can only use names defined above it.\n\n## Pictures and documents\n\nWhen the user sends a photo, a scan, a screenshot or a PDF page:\n\n1. First say briefly what you read: the givens, the equations, and what is being asked.\n2. Mark anything unclear (a smudged digit, a symbol that could be two things, a missing unit). Either ask the user, or state the assumption you made and put it in a note block. Never silently guess.\n3. Attach the source picture with `attach_source_image` so the user can compare, unless they say not to.\n\n## Neatening\n\n- Do not change the meaning of what the user wrote. Keep their equations as written, in iCalPad syntax.\n- If an equation looks wrong (units do not match, a factor seems missing, a sign looks off), keep it as written and flag it in a note block and in your reply. Do not fix it unless asked.\n\n## Modes\n\nThe user turns one of two modes on. The mode is stated in each message.\n\n- **Neat up**: convert what the user gave you into clean iCalPad content. Do not add steps, do not solve, and do not add result lines the source does not have, unless the user asks.\n- **Set up and solve**: write a short title heading, the givens with units, any assumptions (as a note), the equations in order, result lines so iCalPad computes the answers, and a short check (for example a comparison such as `M_u <= phi_M_n`, or a units check).\n\n## Working with the tools\n\n- Each message includes a snapshot of the worksheet with block ids. Use `get_worksheet` if you need it again after changes.\n- Use `after_id` to place new blocks under an existing one. Without it, blocks go at the end of the page.\n- Every tool call is checked. If a call is rejected, read the error, fix the content, and try again. Do not repeat the same content.\n- After writing, call `evaluate`. Fix any errors it reports.\n- Then finish with a short reply: what you wrote, the assumptions you made, and anything you are unsure about.\n\n## Replies\n\nKeep replies short and plain. No hype, no filler, no emoji. Use short sentences or a few bullets. Put iCalPad expressions in backticks, for example `M := w*L^2/8`. Do not paste the whole worksheet back into the reply.\n";
+const API_URL = 'https://api.anthropic.com/v1/messages', API_VERSION = '2023-06-01';
+const MODELS = [
+  { id: 'claude-sonnet-5-5', name: 'Claude Sonnet 5.5', note: 'balanced, the default' },
+  { id: 'claude-opus-5-5', name: 'Claude Opus 5.5', note: 'more capable' },
+  { id: 'claude-fable-5-2', name: 'Claude Fable 5.2', note: 'most capable, highest cost' },
+  { id: 'claude-haiku-5-5', name: 'Claude Haiku 5.5', note: 'fastest, lowest cost' },
+];
+const DEFAULT_MODEL = 'claude-sonnet-5-5';
+const MAX_TOOL_CALLS = 30, MAX_TOKENS = 16000, MAX_RETRIES = 4;
+const LIMITS = { math: 600, text: 1500, heading: 160, caption: 120 };
+
+// ---------- the API key ----------
+const K_KEY = 'icalpad.ai.key', K_REM = 'icalpad.ai.remember';
+function KeyStore(local, session) {
+  let mem = '';
+  const get = (st, k) => { try { return st ? st.getItem(k) : null; } catch (e) { return null; } };
+  const put = (st, k, v) => { try { if (!st) return; if (v == null || v === '') st.removeItem(k); else st.setItem(k, v); } catch (e) { /* storage may be blocked */ } };
+  const ks = {
+    remembered: () => get(local, K_REM) === '1',
+    get: () => mem || get(session, K_KEY) || (get(local, K_REM) === '1' ? get(local, K_KEY) : '') || '',
+    has: () => !!ks.get(),
+    set(key, remember) {
+      key = String(key || '').trim(); mem = key;
+      if (remember) { put(local, K_KEY, key); put(local, K_REM, '1'); put(session, K_KEY, null); }
+      else { put(local, K_KEY, null); put(local, K_REM, null); put(session, K_KEY, key); }
+    },
+    setRemember(on) { ks.set(ks.get(), on); if (on && !ks.get()) put(local, K_REM, '1'); },
+    forget() { mem = ''; put(local, K_KEY, null); put(local, K_REM, null); put(session, K_KEY, null); },
+  };
+  return ks;
+}
+/* Anything shown to the user or written to the console goes through scrub(), so a key can never leak into a message. */
+function scrub(text, key) {
+  let s = String(text == null ? '' : text);
+  if (key && key.length >= 8) s = s.split(key).join('[hidden key]');
+  return s.replace(/sk-ant-[A-Za-z0-9_\-]{6,}/g, '[hidden key]');
+}
+const looksLikeKey = k => /^sk-ant-[A-Za-z0-9_\-]{20,}$/.test(String(k || '').trim());
+
+// ---------- errors ----------
+class AIError extends Error { constructor(kind, message, extra) { super(message); this.kind = kind; Object.assign(this, extra || {}); } }
+function httpError(status, detail, key) {
+  const d = detail ? ' ' + scrub(detail, key).slice(0, 300) : '';
+  const msg = status === 401 ? 'Anthropic did not accept the API key (401). Check the key in the assistant settings.'
+    : status === 403 ? 'This API key is not allowed to do that (403).' + d
+    : status === 404 ? 'Anthropic did not find that model (404). Pick another model in the assistant settings.' + d
+    : status === 413 ? 'The message is too large (413). Try a smaller picture or a shorter PDF.'
+    : status === 429 ? 'Rate limit reached (429). Wait a minute, then try again.' + d
+    : status === 529 ? 'Anthropic is overloaded right now (529). Try again in a minute.'
+    : status === 400 ? 'Anthropic rejected the request (400).' + d
+    : status >= 500 ? `Anthropic had a server error (${status}). Try again in a moment.`
+    : `The request failed (${status}).` + d;
+  return new AIError(status === 401 ? 'auth' : status === 429 ? 'rate' : status === 529 ? 'overloaded' : 'http', msg, { status });
+}
+const RETRY = new Set([429, 500, 502, 503, 504, 529]);
+const sleepFor = (ms, signal) => new Promise((res, rej) => {
+  if (signal && signal.aborted) return rej(new AIError('abort', 'Stopped'));
+  const t = setTimeout(res, ms);
+  if (signal) signal.addEventListener('abort', () => { clearTimeout(t); rej(new AIError('abort', 'Stopped')); }, { once: true });
+});
+
+// ---------- streaming (server-sent events) ----------
+function sseParser(onEvent) {
+  let buf = '', ev = '', data = [];
+  const dispatch = () => { if (data.length) { const raw = data.join('\n'); let j = null; try { j = JSON.parse(raw); } catch (e) { j = null; } if (j) onEvent(ev || j.type, j); } ev = ''; data = []; };
+  return {
+    push(chunk) {
+      buf += chunk; let i;
+      while ((i = buf.search(/\r?\n/)) >= 0) {
+        const line = buf.slice(0, i); buf = buf.slice(i + (buf[i] === '\r' ? 2 : 1));
+        if (line === '') dispatch();
+        else if (line.startsWith('event:')) ev = line.slice(6).trim();
+        else if (line.startsWith('data:')) data.push(line.slice(5).replace(/^ /, ''));
+      }
+    },
+    end() { if (buf) { this.push('\n'); } dispatch(); },
+  };
+}
+/* Builds one assistant message from the stream. Thinking blocks are kept whole (with signatures), because the API needs them back unchanged during a tool loop. */
+function assembler(cb = {}) {
+  const msg = { content: [], stop_reason: null, usage: {} }, json = {};
+  const on = (type, d) => {
+    if (type === 'message_start') { msg.id = d.message && d.message.id; Object.assign(msg.usage, (d.message && d.message.usage) || {}); }
+    else if (type === 'content_block_start') {
+      const b = JSON.parse(JSON.stringify(d.content_block || {}));
+      if (b.type === 'tool_use') { json[d.index] = ''; b.input = {}; }
+      if (b.type === 'text') b.text = b.text || '';
+      if (b.type === 'thinking') { b.thinking = b.thinking || ''; b.signature = b.signature || ''; }
+      msg.content[d.index] = b; if (cb.onBlockStart) cb.onBlockStart(b, d.index);
+    } else if (type === 'content_block_delta') {
+      const b = msg.content[d.index], x = d.delta || {}; if (!b) return;
+      if (x.type === 'text_delta') { b.text += x.text; if (cb.onText) cb.onText(x.text, d.index); }
+      else if (x.type === 'input_json_delta') json[d.index] += x.partial_json || '';
+      else if (x.type === 'thinking_delta') b.thinking += x.thinking || '';
+      else if (x.type === 'signature_delta') b.signature = (b.signature || '') + (x.signature || '');
+      else if (x.type === 'citations_delta') (b.citations = b.citations || []).push(x.citation);
+    } else if (type === 'content_block_stop') {
+      const b = msg.content[d.index]; if (!b) return;
+      if (b.type === 'tool_use') { try { b.input = json[d.index] ? JSON.parse(json[d.index]) : {}; } catch (e) { b.input = {}; b._badJson = true; } }
+      if (cb.onBlockStop) cb.onBlockStop(b, d.index);
+    } else if (type === 'message_delta') {
+      if (d.delta && d.delta.stop_reason) msg.stop_reason = d.delta.stop_reason;
+      if (d.usage) Object.assign(msg.usage, d.usage);
+    } else if (type === 'error') {
+      const e = d.error || {};
+      throw new AIError(e.type === 'overloaded_error' ? 'overloaded' : 'stream', e.type === 'overloaded_error' ? 'Anthropic is overloaded right now (529). Try again in a minute.' : 'The response stopped with an error: ' + (e.message || e.type || 'unknown'), { retryable: e.type === 'overloaded_error' || e.type === 'api_error' });
+    }
+  };
+  return { msg, on };
+}
+async function readStream(res, onEvent, signal) {
+  const p = sseParser(onEvent);
+  if (!res.body || !res.body.getReader) { p.push(await res.text()); p.end(); return; }
+  const rd = res.body.getReader(), dec = new TextDecoder();
+  const stop = () => { try { rd.cancel(); } catch (e) { /* already closed */ } };
+  if (signal) signal.addEventListener('abort', stop, { once: true });
+  try {
+    for (;;) {
+      if (signal && signal.aborted) throw new AIError('abort', 'Stopped');
+      const { done, value } = await rd.read();
+      if (done) break;
+      p.push(dec.decode(value, { stream: true }));
+    }
+    p.end();
+  } finally { if (signal) signal.removeEventListener('abort', stop); }
+  if (signal && signal.aborted) throw new AIError('abort', 'Stopped');
+}
+/* One request, retried with backoff on 429, 529 and 5xx. Honors retry-after. */
+async function request({ fetchFn, key, body, signal, onStatus, sleep = sleepFor }) {
+  for (let attempt = 0; ; attempt++) {
+    let res;
+    try {
+      res = await fetchFn(API_URL, {
+        method: 'POST', signal, body: JSON.stringify(body),
+        headers: { 'x-api-key': key, 'anthropic-version': API_VERSION, 'content-type': 'application/json', 'anthropic-dangerous-direct-browser-access': 'true' },
+      });
+    } catch (e) {
+      if ((signal && signal.aborted) || (e && e.name === 'AbortError')) throw new AIError('abort', 'Stopped');
+      throw new AIError('network', 'Could not reach Anthropic. Check your internet connection, then try again.');
+    }
+    if (res.ok) return res;
+    let detail = ''; try { const j = await res.json(); detail = (j && j.error && j.error.message) || ''; } catch (e) { /* no body */ }
+    if (RETRY.has(res.status) && attempt < MAX_RETRIES) {
+      const ra = parseFloat(res.headers && res.headers.get && res.headers.get('retry-after'));
+      const ms = ra > 0 ? Math.min(60, ra) * 1000 : Math.min(30000, 1000 * 2 ** attempt) + Math.floor(Math.random() * 250);
+      if (onStatus) onStatus({ kind: 'retry', status: res.status, attempt: attempt + 1, ms, text: `${res.status === 429 ? 'Rate limited' : res.status === 529 ? 'Anthropic is busy' : 'Server error'} (${res.status}). Trying again in ${Math.round(ms / 1000)} s…` });
+      await sleep(ms, signal); continue;
+    }
+    throw httpError(res.status, detail, key);
+  }
+}
+
+// ---------- worksheet tools ----------
+const TOOLS = [
+  { name: 'get_syntax_guide', description: 'Returns the iCalPad syntax guide: block types, math line forms, functions, units. It is generated from the running code.', input_schema: { type: 'object', properties: {} } },
+  { name: 'get_worksheet', description: 'Returns every block on the worksheet in reading order, with its id, type, content and status (ok or the exact error). Values are not included; use get_result for those.', input_schema: { type: 'object', properties: {} } },
+  { name: 'add_block', description: 'Adds one block. Types: heading, text, note (a highlighted remark), definition (name := value), equation (a relation shown as written, such as M = w*L^2/8 or x^2 + 3 = 7, or a check such as M <= 100 kN*m), result (an expression ending with =, = unit or ->, which iCalPad evaluates), image (a source picture; content is an image_ref such as img1). The block is checked and evaluated. If it has an error it is not added and the exact error is returned.', input_schema: { type: 'object', properties: { type: { type: 'string', enum: ['heading', 'text', 'note', 'definition', 'equation', 'result', 'image'] }, content: { type: 'string', description: 'The block content in iCalPad syntax. One line for math and headings.' }, after_id: { type: 'string', description: 'Put the new block right below this block. Leave out to add at the end of the page.' }, level: { type: 'integer', enum: [1, 2, 3], description: 'Heading level (1 is largest). Default 2.' } }, required: ['type', 'content'] } },
+  { name: 'edit_block', description: 'Replaces the content of an existing heading, text, note or math block. Checked like add_block; on an error nothing changes and the exact error is returned.', input_schema: { type: 'object', properties: { id: { type: 'string' }, content: { type: 'string' }, type: { type: 'string', enum: ['heading', 'text', 'note', 'definition', 'equation', 'result'], description: 'Leave out to keep the current type.' } }, required: ['id', 'content'] } },
+  { name: 'move_block', description: 'Moves a block to just below another block (after_id), or to the top of the page when after_id is left out. A move that would break a calculation is undone and the error is returned.', input_schema: { type: 'object', properties: { id: { type: 'string' }, after_id: { type: 'string' } }, required: ['id'] } },
+  { name: 'delete_block', description: 'Deletes a block. If other blocks would then have errors, nothing is deleted and those errors are returned, unless force is true.', input_schema: { type: 'object', properties: { id: { type: 'string' }, force: { type: 'boolean' } }, required: ['id'] } },
+  { name: 'evaluate', description: 'Recalculates the worksheet and returns any blocks with errors.', input_schema: { type: 'object', properties: {} } },
+  { name: 'get_result', description: 'Returns the value iCalPad computed for a result or check block, exactly as shown on the worksheet. Use it only to read or explain results; never type the value into the worksheet.', input_schema: { type: 'object', properties: { id: { type: 'string' } }, required: ['id'] } },
+  { name: 'attach_source_image', description: 'Places a picture the user sent in this chat on the worksheet as a collapsible source reference, so the user can compare it with what you wrote.', input_schema: { type: 'object', properties: { image_ref: { type: 'string', description: 'The reference given with the attachment, such as img1.' }, caption: { type: 'string', description: 'A short caption, for example "Source: hand calculation".' }, after_id: { type: 'string' }, collapsed: { type: 'boolean', description: 'Start folded. Default false.' } }, required: ['image_ref'] } },
+];
+const TOOL_NAMES = new Set(TOOLS.map(t => t.name));
+
+/* AST helpers over parseStatement trees (no evaluation). */
+const isUnitName = n => !!(Core.UNITS[n] || n === 'deg');
+function unitOnly(x) {
+  if (!x) return false;
+  if (x.t === 'sym') return isUnitName(x.name);
+  if (x.t === 'bin' && (x.op === '*' || x.op === '/')) return unitOnly(x.l) && unitOnly(x.r);
+  if (x.t === 'bin' && x.op === '^') return unitOnly(x.l) && (x.r.t === 'num' || (x.r.t === 'neg' && x.r.x.t === 'num'));
+  return false;
+}
+/* A typed number, possibly with units: 90, -2.5, 90 kN*m, 20 kN/m. Nothing calculated. */
+function literalQty(x) {
+  if (!x) return false;
+  if (x.t === 'num') return true;
+  if (x.t === 'neg') return literalQty(x.x);
+  if (x.t === 'bin' && x.op === '*') return (literalQty(x.l) && unitOnly(x.r)) || (unitOnly(x.l) && literalQty(x.r));
+  if (x.t === 'bin' && x.op === '/') return literalQty(x.l) && unitOnly(x.r);
+  return false;
+}
+function parseMath(src) { try { return { st: Core.parseStatement(src) }; } catch (e) { return { err: (e && e.message) || 'This line could not be read' }; } }
+function mathType(src) {
+  const { st } = parseMath(src); if (!st) return 'math';
+  return st.kind === 'def' ? 'definition' : st.kind === 'eval' ? 'result' : st.kind === 'empty' ? 'math' : 'equation';
+}
+function blockType(rg) {
+  if (rg.type === 'text') return rg.kind === 'note' ? 'note' : /^#{1,3}\s/.test(rg.src || '') ? 'heading' : 'text';
+  if (rg.type === 'image') return rg.ref ? 'source_image' : rg.img ? 'picture' : 'sketch';
+  if (rg.type === 'plot') return 'plot';
+  return mathType(rg.src || '');
+}
+function blockContent(rg) {
+  if (rg.type === 'text') return blockType(rg) === 'heading' ? rg.src.replace(/^#{1,3}\s+/, '') : rg.src;
+  if (rg.type === 'image') return rg.cap || '';
+  if (rg.type === 'plot') return `${rg.exprs} | ${rg.xvar} from ${rg.x0} to ${rg.x1}`;
+  return rg.src;
+}
+function statusOf(rg, results) {
+  const r = results && results.get(rg.id); if (!r) return 'ok';
+  if (r.err) return 'error: ' + r.err;
+  if (r.pending) return 'waiting for the advanced solver';
+  return 'ok';
+}
+function errorsOf(regions, results) { const m = new Map(); for (const rg of regions) { const r = results.get(rg.id); if (r && r.err) m.set(rg.id, r.err); } return m; }
+function newErrors(before, after, skip) { const out = []; for (const [id, err] of after) if (id !== skip && before.get(id) !== err) out.push({ id, error: err }); return out; }
+
+/* Text, headings and notes may not state values with "=", unless the number is a given typed in a math block on the page. */
+function textStatesValue(text, regions) {
+  const typed = new Set(); for (const rg of regions) if (rg.type === 'math') for (const m of String(rg.src).matchAll(/\d+(?:\.\d+)?/g)) typed.add(String(+m[0]));
+  for (const m of String(text).matchAll(/(?:=|≈|\\approx)\s*\$?\s*(-?\d+(?:[.,]\d+)?(?:[eE][+-]?\d+)?)/g)) { const n = String(+m[1].replace(',', '.')); if (!typed.has(n)) return m[0].trim(); }
+  return null;
+}
+/* Checks content for a block type. Returns { src, kind? } for the region, or { error }. */
+function checkContent(type, content, level, regions, selfId) {
+  if (typeof content !== 'string') return { error: 'content must be a string.' };
+  const c = content.replace(/\r\n?/g, '\n').trim();
+  if (!c) return { error: 'content is empty.' };
+  if (type === 'heading' || type === 'text' || type === 'note') {
+    if (type === 'heading' && c.includes('\n')) return { error: 'A heading must be one line.' };
+    if (c.length > (type === 'heading' ? LIMITS.heading : LIMITS.text)) return { error: `Too long: keep a ${type} under ${type === 'heading' ? LIMITS.heading : LIMITS.text} characters.` };
+    const said = textStatesValue(c, regions.filter(r => r.id !== selfId));
+    if (said) return { error: `A ${type} block cannot state a value ("${said}"). Put given values in definitions (name := value unit) and let result lines (name =) show computed values.` };
+    if (type === 'heading') { const lv = [1, 2, 3].includes(level) ? level : 2; return { region: { type: 'text', src: /^#{1,3}\s/.test(c) ? c : '#'.repeat(lv) + ' ' + c, w: 760 } }; }
+    if (/^#{1,3}\s/.test(c)) return { error: 'Text starting with # becomes a heading. Use type heading, or remove the #.' };
+    return { region: type === 'note' ? { type: 'text', kind: 'note', src: c, w: 560 } : { type: 'text', src: c, w: 640 } };
+  }
+  if (type === 'definition' || type === 'equation' || type === 'result') {
+    if (c.includes('\n')) return { error: 'A math block must be one line. Add one block per line.' };
+    if (c.length > LIMITS.math) return { error: `Too long: keep a math line under ${LIMITS.math} characters.` };
+    const p = parseMath(c); if (p.err) return { error: p.err };
+    const st = p.st;
+    if (type === 'definition') {
+      if (st.kind !== 'def') return { error: 'A definition needs :=, for example  w := 20 kN/m' };
+      if (literalQty(st.expr)) {
+        for (const rg of regions) {
+          if (rg.id === selfId || rg.type !== 'math') continue;
+          const q = parseMath(rg.src).st; if (!q) continue;
+          const name = q.kind === 'def' ? q.name : q.kind === 'expr' && q.expr.t === 'rel' && q.expr.op === '=' && q.expr.l.t === 'sym' ? q.expr.l.name : null;
+          const rhs = q.kind === 'def' ? q.expr : name ? q.expr.r : null;
+          if (name === st.name && rhs && !literalQty(rhs)) return { error: `${st.name} is calculated by iCalPad in block ${rg.id}. Do not type its value; add a result line such as  ${st.name} =  instead.` };
+        }
+      }
+    } else if (type === 'result') {
+      if (st.kind !== 'eval') return { error: st.kind === 'def' ? 'This is a definition (it uses :=). Use type definition, then add a result line such as  name =' : 'A result line ends with = , = unit, or ->, for example  M =   or   M = kN*m   or   x ->' };
+      if (st.show === 'num' && !st.unit && literalQty(st.expr)) return { error: 'This result line only repeats a typed number. A result must be calculated from names defined above (for example  M = ), or convert units (for example  5 ft + 3 in = cm).' };
+    } else {
+      if (st.kind === 'def') return { error: 'This line uses :=, so it is a definition. Use type definition.' };
+      if (st.kind === 'eval') return { error: 'This line ends with = or ->, so it is a result line. Use type result.' };
+      const e = st.expr;
+      if (e.t === 'rel' && e.op === '=' && e.l.t === 'sym' && literalQty(e.r)) return { error: `Write a given value as a definition:  ${e.l.name} := ...  (type definition). Never type a calculated value; use a result line such as  ${e.l.name} =` };
+    }
+    return { region: { type: 'math', src: c } };
+  }
+  return { error: `Unknown block type "${type}". Use heading, text, note, definition, equation, result or image.` };
+}
+
+/* The tool executor. `doc` is the page (in the browser, the command layer; in tests, a fake built on Core.evalDoc).
+   doc: regions(), region(id), results(), add(spec, afterId), edit(id, patch), move(id, afterId), positions(), setPositions(map),
+        remove(id) -> copy, restore(copy), evaluate() -> results, addImage(src) -> key */
+function Executor(doc, opt = {}) {
+  const images = opt.images || new Map();                 // image_ref -> { src, name, mime }
+  const log = [], changed = new Set(), actions = [];
+  const exists = id => typeof id === 'string' && !!doc.region(id);
+  const bad = (error, extra) => ({ ok: false, result: { error, ...(extra || {}) } });
+  const good = result => ({ ok: true, result });
+  const errs = () => errorsOf(doc.regions(), doc.results());
+  const tools = {
+    get_syntax_guide: () => good({ guide: syntaxGuide() }),
+    get_worksheet: () => good({ blocks: doc.regions().map(rg => ({ id: rg.id, type: blockType(rg), content: blockContent(rg), status: statusOf(rg, doc.results()) })) }),
+    evaluate() {
+      const res = doc.evaluate(), list = doc.regions().filter(rg => res.get(rg.id) && res.get(rg.id).err).map(rg => ({ id: rg.id, content: blockContent(rg), error: res.get(rg.id).err }));
+      return good({ blocks: doc.regions().length, errors: list, ok: !list.length });
+    },
+    get_result({ id }) {
+      if (!exists(id)) return bad(`No block with id ${id}.`);
+      const rg = doc.region(id), r = doc.results().get(id);
+      if (rg.type !== 'math') return bad('Only math blocks have results.');
+      if (!r) return bad('This block has not been evaluated.');
+      if (r.err) return bad('This block has an error: ' + r.err);
+      if (r.pending) return good({ id, status: 'waiting for the advanced solver' });
+      if (r.kind === 'check') return good({ id, source: rg.src, check: r.check ? 'OK (true)' : 'NG (false)' });
+      if (r.kind === 'def') return good({ id, source: rg.src, note: 'Definitions do not display a value. Add a result line such as  ' + (r.name || 'name') + ' =  to show it.' });
+      if (r.kind === 'expr') return good({ id, source: rg.src, note: 'This equation is shown as written and has no computed value.' });
+      return good({ id, source: rg.src, value: r.text, shown_as: 'computed by iCalPad' });
+    },
+    add_block({ type, content, after_id, level }) {
+      if (after_id != null && !exists(after_id)) return bad(`No block with id ${after_id}. Use get_worksheet to see the ids.`);
+      if (type === 'image') return tools.attach_source_image({ image_ref: content, after_id });
+      const chk = checkContent(type, content, level, doc.regions(), null); if (chk.error) return bad(chk.error, { added: false });
+      const before = errs(), rg = doc.add(chk.region, after_id || null), res = doc.evaluate(), r = res.get(rg.id);
+      if (r && r.err) { doc.remove(rg.id); doc.evaluate(); return bad(r.err, { added: false, content: chk.region.src, note: 'Nothing was added. Fix the content and call add_block again.' }); }
+      const broke = newErrors(before, errs(), rg.id);
+      if (broke.length) { doc.remove(rg.id); doc.evaluate(); return bad('Adding this block breaks other blocks, so it was not added.', { added: false, broken: broke }); }
+      log.push({ op: 'add', id: rg.id, src: rg.src }); changed.add(rg.id); actions.push({ op: 'Added', type, text: blockContent(rg), id: rg.id });
+      return good({ id: rg.id, type: blockType(rg), status: statusOf(rg, res) });
+    },
+    edit_block({ id, content, type }) {
+      if (!exists(id)) return bad(`No block with id ${id}.`);
+      const rg = doc.region(id); if (rg.type !== 'math' && rg.type !== 'text') return bad('Only heading, text, note and math blocks can be edited.');
+      const cur = blockType(rg), t = type || (['definition', 'equation', 'result', 'heading', 'text', 'note'].includes(cur) ? cur : rg.type === 'math' ? mathType(content) : 'text');
+      if ((rg.type === 'math') !== ['definition', 'equation', 'result'].includes(t)) return bad(`Block ${id} is a ${cur} block and cannot become a ${t} block. Delete it and add a new one.`);
+      const lvl = cur === 'heading' ? (/^(#{1,3})\s/.exec(rg.src) || ['', '##'])[1].length : 2;
+      const chk = checkContent(t, content, lvl, doc.regions(), id); if (chk.error) return bad(chk.error, { changed: false });
+      const old = { src: rg.src, kind: rg.kind, w: rg.w }, patch = { src: chk.region.src, kind: chk.region.kind };
+      if (old.src === patch.src && old.kind === patch.kind) return good({ id, unchanged: true, status: statusOf(rg, doc.results()) });
+      const before = errs(); doc.edit(id, patch); const res = doc.evaluate(), r = res.get(id);
+      const undoEdit = () => { doc.edit(id, { src: old.src, kind: old.kind }); doc.evaluate(); };
+      if (r && r.err) { undoEdit(); return bad(r.err, { changed: false, note: 'The block was left as it was.' }); }
+      const broke = newErrors(before, errs(), id);
+      if (broke.length) { undoEdit(); return bad('This change breaks other blocks, so it was not made.', { changed: false, broken: broke }); }
+      log.push({ op: 'edit', id, old, now: patch.src }); changed.add(id); actions.push({ op: 'Changed', type: t, text: blockContent(doc.region(id)), from: old.src, id });
+      return good({ id, type: blockType(doc.region(id)), status: statusOf(doc.region(id), res) });
+    },
+    move_block({ id, after_id }) {
+      if (!exists(id)) return bad(`No block with id ${id}.`);
+      if (after_id != null && !exists(after_id)) return bad(`No block with id ${after_id}.`);
+      if (after_id === id) return bad('A block cannot move below itself.');
+      const rg = doc.region(id), from = doc.positions(), before = errs();
+      doc.move(id, after_id || null); doc.evaluate();
+      const broke = newErrors(before, errs(), null);
+      if (broke.length) { doc.setPositions(from); doc.evaluate(); return bad('This move breaks the calculation (a name would be used before it is defined), so the block was left where it was.', { moved: false, broken: broke }); }
+      log.push({ op: 'move', id, from, to: doc.positions() }); changed.add(id); actions.push({ op: 'Moved', type: blockType(rg), text: blockContent(rg), id });
+      return good({ id, moved: true });
+    },
+    delete_block({ id, force }) {
+      if (!exists(id)) return bad(`No block with id ${id}.`);
+      const before = errs(), rg = doc.region(id), what = { type: blockType(rg), text: blockContent(rg) }, copy = doc.remove(id); doc.evaluate();
+      const broke = newErrors(before, errs(), id);
+      if (broke.length && !force) { doc.restore(copy); doc.evaluate(); return bad('Deleting this block would break other blocks, so it was kept. Call again with force: true to delete anyway.', { deleted: false, broken: broke }); }
+      log.push({ op: 'delete', id, copy }); changed.delete(id); actions.push({ op: 'Deleted', ...what, id });
+      return good({ id, deleted: true, ...(broke.length ? { broken: broke } : {}) });
+    },
+    attach_source_image({ image_ref, caption, after_id, collapsed }) {
+      const im = typeof image_ref === 'string' && images.get(image_ref.trim());
+      if (!im) return bad(`No picture called ${image_ref} in this chat. Pictures the user sent are listed as img1, img2, …`);
+      if (!/^data:image\/(png|jpeg|gif|webp);base64,/.test(im.src)) return bad('Only pictures can be placed on the worksheet. PDF pages cannot.');
+      if (after_id != null && !exists(after_id)) return bad(`No block with id ${after_id}.`);
+      const cap = String(caption || ('Source: ' + (im.name || 'picture'))).replace(/\s+/g, ' ').trim().slice(0, LIMITS.caption);
+      const key = doc.addImage(im.src), ar = im.h && im.w ? im.h / im.w : 0.75;
+      const rg = doc.add({ type: 'image', img: key, w: Math.min(460, Math.max(160, im.w || 460)), ar: Math.min(8, Math.max(0.05, ar)), ann: [], ref: true, cap, ...(collapsed ? { fold: true } : {}) }, after_id || null);
+      doc.evaluate();
+      log.push({ op: 'add', id: rg.id }); changed.add(rg.id); actions.push({ op: 'Attached', type: 'source image', text: cap, id: rg.id });
+      return good({ id: rg.id, type: 'source_image' });
+    },
+  };
+  function exec(name, input) {
+    if (!TOOL_NAMES.has(name)) return bad(`Unknown tool ${name}.`);
+    if (!input || typeof input !== 'object' || Array.isArray(input)) return bad('The tool input must be an object.');
+    try { return tools[name](input); } catch (e) { return bad('The tool failed: ' + ((e && e.message) || 'unknown error')); }
+  }
+  return { exec, log, changed, actions };
+}
+/* Reverses one assistant turn, newest change first. Blocks the user changed afterwards are left alone and reported. */
+function undoTurn(doc, log) {
+  const skipped = [];
+  for (let i = log.length - 1; i >= 0; i--) {
+    const o = log[i];
+    if (o.op === 'add') { const rg = doc.region(o.id); if (!rg) continue; if (o.src != null && rg.src !== o.src) { skipped.push(o.id); continue; } doc.remove(o.id); }
+    else if (o.op === 'edit') { const rg = doc.region(o.id); if (!rg) continue; if (rg.src !== o.now) { skipped.push(o.id); continue; } doc.edit(o.id, { src: o.old.src, kind: o.old.kind }); }
+    else if (o.op === 'move') {           // put back only the blocks that are still where this move left them
+      const now = doc.positions(), back = {};
+      for (const id in o.from) if (now[id] && o.to[id] && now[id].x === o.to[id].x && now[id].y === o.to[id].y) back[id] = o.from[id];
+      doc.setPositions(back);
+    }
+    else if (o.op === 'delete') { if (!doc.region(o.id)) doc.restore(o.copy); }
+  }
+  doc.evaluate();
+  return { skipped };
+}
+
+// ---------- the syntax guide and system prompt, generated from the running code ----------
+function syntaxGuide() {
+  const out = ['# iCalPad syntax (generated from the code that runs this page)', '',
+    '## Block types for add_block',
+    '- heading: one short line. level 1, 2 or 3.',
+    '- text: one or two plain sentences. Math inside $ signs is typeset, for example $M_u$.',
+    '- note: a highlighted remark: an assumption, a doubt, a flag on an equation that looks wrong.',
+    '- definition: `name := expression`. Givens: `L := 6 m`. Derived: `M := w*L^2/8`. Functions: `f(x) := x^2 + 1`.',
+    '- result: an expression ending with `=` (number), `= unit` (number in that unit) or `->` (exact symbolic answer, optionally followed by a keyword such as simplify, expand, factor, float). iCalPad fills in the answer.',
+    '- equation: a relation shown as written, such as `x^2 + 3 = 7` or `M = w*L^2/8`. If the left side is a single name with no value yet, iCalPad also defines it. A comparison (`<=`, `>=`, `<`, `>`) gets an OK or NG stamp.',
+    '- image: a source picture from this chat (content is its image_ref). Same as attach_source_image.',
+    '', '## Rules',
+    '- One statement per math block. Blocks are read top to bottom, then left to right; a name must be defined above where it is used.',
+    '- Names: letters, digits, underscores for subscripts (M_max, sigma_y), and a trailing prime (fc\'). Greek letters are written as words (alpha, beta, sigma, phi, rho, epsilon, theta).',
+    '- Multiplication can be implicit between a number and a unit (20 kN/m) but write * between names (w*L^2).',
+    '- LaTeX input is accepted on a math line (for example \\frac{w L^2}{8} =).',
+    '- Units attach to numbers: 20 kN/m, 4 ksi, 9.81 m/s^2. Mixed units are converted automatically.',
+  ];
+  for (const [h, rows] of HELP) {
+    if (/working on the page/i.test(h)) continue;
+    out.push('', '## ' + h); for (const [c, d] of rows) out.push(`- \`${c}\`: ${d}`);
+  }
+  out.push('', '## Functions', Object.keys(Core.FN).concat(Object.keys(Core.NF)).filter((v, i, a) => a.indexOf(v) === i).join(', '));
+  out.push('', '## Operations that bind a variable', Object.keys(Core.BIND).join(', '));
+  out.push('', '## Units', Object.keys(Core.UNITS).concat(['deg']).join(', '));
+  out.push('', '## Constants', 'pi, e, inf, i (imaginary unit), g (standard gravity, a unit)');
+  return out.join('\n');
+}
+const MODE_TEXT = {
+  neat: 'Mode: Neat up. Convert only. Do not add steps, solve, or add result lines the source does not have unless I ask.',
+  solve: 'Mode: Set up and solve. Write a title, the givens with units, assumptions, the equations in order, result lines so iCalPad computes the answers, and a short check.',
+};
+function systemPrompt() { return SYSTEM_MD.trim() + '\n\n' + syntaxGuide(); }
+/* A compact view of the page sent with each message (ids, types, content, status; no values). */
+function snapshot(regions, results, cap = 14000) {
+  if (!regions.length) return 'The worksheet is empty.';
+  const lines = []; let n = 0;
+  for (const rg of regions) {
+    const ln = `${rg.id} | ${blockType(rg)} | ${blockContent(rg).replace(/\n/g, ' / ')}${statusOf(rg, results) === 'ok' ? '' : ' | ' + statusOf(rg, results)}`;
+    if (n + ln.length > cap) { lines.push(`… ${regions.length - lines.length} more blocks. Call get_worksheet to see them.`); break; }
+    lines.push(ln); n += ln.length + 1;
+  }
+  return 'Current worksheet (id | type | content | status), in reading order:\n' + lines.join('\n');
+}
+function userContent({ text, mode, attachments, page }) {
+  const blocks = [];
+  for (const a of attachments || []) {
+    if (a.mime === 'application/pdf') blocks.push({ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: a.data }, title: a.name ? String(a.name).slice(0, 200) : undefined });
+    else blocks.push({ type: 'image', source: { type: 'base64', media_type: a.mime, data: a.data } });
+  }
+  const refs = (attachments || []).map(a => `${a.ref}: ${a.mime === 'application/pdf' ? 'PDF' : 'picture'}${a.name ? ' (' + String(a.name).slice(0, 80) + ')' : ''}`);
+  const parts = [MODE_TEXT[mode] || MODE_TEXT.neat, page];
+  if (refs.length) parts.push('Attached, in order: ' + refs.join('; ') + '.');
+  parts.push('My message:\n' + (String(text || '').trim() || (refs.length ? 'Please write this on the worksheet.' : '')));
+  blocks.push({ type: 'text', text: parts.join('\n\n') });
+  return blocks;
+}
+
+// ---------- one assistant turn: stream, run tools, repeat ----------
+function cleanAssistant(content) {
+  return content.filter(b => b && !(b.type === 'text' && !b.text)).map(b => { if (b.type === 'tool_use') { const { _badJson, ...rest } = b; return rest; } if (b.type === 'text' && b.citations === undefined) { const { citations, ...rest } = b; return rest; } return b; });
+}
+const CACHEABLE = new Set(['text', 'image', 'document', 'tool_result', 'tool_use']);
+/* Marks the end of the conversation so far for prompt caching, without changing the stored history. */
+function withCacheMark(messages) {
+  return messages.map((m, i) => i !== messages.length - 1 || !Array.isArray(m.content) ? m
+    : { ...m, content: m.content.map((b, j) => j === m.content.length - 1 && CACHEABLE.has(b.type) ? { ...b, cache_control: { type: 'ephemeral' } } : b) });
+}
+async function runTurn({ fetchFn, key, model, messages, content, exec, signal, on = () => {}, sleep = sleepFor, maxTokens = MAX_TOKENS, usage }) {
+  const last = messages[messages.length - 1];
+  if (last && last.role === 'user') last.content = last.content.concat(content || []);
+  else if (content && content.length) messages.push({ role: 'user', content });
+  else throw new AIError('state', 'There is nothing to send.');
+  usage = usage || {}; for (const k of ['input', 'output', 'cacheRead', 'cacheWrite', 'requests']) usage[k] = usage[k] || 0;
+  let calls = 0, stop = null, limitHit = false;
+  const system = [{ type: 'text', text: systemPrompt(), cache_control: { type: 'ephemeral' } }];
+  for (let round = 0; round < MAX_TOOL_CALLS + 5; round++) {
+    const body = { model, max_tokens: maxTokens, system, tools: TOOLS, messages: withCacheMark(messages), stream: true };
+    let asm;
+    for (let attempt = 0; ; attempt++) {
+      const res = await request({ fetchFn, key, body, signal, sleep, onStatus: s => on('status', s) });
+      on('status', { kind: 'streaming', text: 'Writing…' });
+      asm = assembler({ onText: t => on('text', t), onBlockStart: b => { if (b.type === 'tool_use') on('tool_start', b); } });
+      try { await readStream(res, asm.on, signal); break; }
+      catch (e) {
+        if (e.kind === 'abort') throw e;
+        if (e.retryable && attempt < MAX_RETRIES && !asm.msg.content.some(b => b && b.type !== 'thinking')) { const ms = Math.min(30000, 1000 * 2 ** attempt); on('status', { kind: 'retry', text: `${e.message} Trying again in ${Math.round(ms / 1000)} s…` }); await sleep(ms, signal); continue; }
+        throw e;
+      }
+    }
+    const m = asm.msg; usage.requests++;
+    usage.input += m.usage.input_tokens || 0; usage.output += m.usage.output_tokens || 0; usage.cacheRead += m.usage.cache_read_input_tokens || 0; usage.cacheWrite += m.usage.cache_creation_input_tokens || 0;
+    const blocks = cleanAssistant(m.content);
+    stop = m.stop_reason;
+    if (blocks.length) messages.push({ role: 'assistant', content: blocks });
+    on('message', { blocks, stop });
+    if (stop === 'pause_turn') continue;
+    if (stop !== 'tool_use') break;
+    const results = [];
+    for (const b of blocks) {
+      if (b.type !== 'tool_use') continue;
+      calls++;
+      let r;
+      if (calls > MAX_TOOL_CALLS) { limitHit = true; r = { ok: false, result: { error: `The limit of ${MAX_TOOL_CALLS} tool calls for this message was reached. Stop and summarize.` } }; }
+      else r = await exec(b.name, b.input);
+      on('tool', { name: b.name, input: b.input, ok: r.ok, result: r.result, n: calls });
+      results.push({ type: 'tool_result', tool_use_id: b.id, content: JSON.stringify(r.result), ...(r.ok ? {} : { is_error: true }) });
+    }
+    messages.push({ role: 'user', content: results });
+    if (limitHit) break;
+  }
+  return { usage, calls: Math.min(calls, MAX_TOOL_CALLS), stop, limitHit };
+}
+
+// ---------- safe rendering of model text ----------
+/* Model text is untrusted. It is escaped first (Core.mdToHtml escapes before adding its own markup), so tags in it stay text. */
+function renderSafe(text) {
+  const src = String(text == null ? '' : text).replace(/[\u0001\u0002]/g, '').replace(/`[^`\n]+`/g, m => m.replace(/\*/g, '\u0001').replace(/\$/g, '\u0002'));   // keep * and $ inside code as typed
+  return Core.mdToHtml(src).replace(/\u0001/g, '*').replace(/\u0002/g, '$');
+}
+function fmtUsage(u) {
+  const f = n => Number(n || 0).toLocaleString('en-US');
+  return `Tokens: ${f(u.input + u.cacheRead + u.cacheWrite)} in${u.cacheRead ? ` (${f(u.cacheRead)} cached)` : ''}, ${f(u.output)} out, ${u.requests} ${u.requests === 1 ? 'request' : 'requests'}`;
+}
+/* Counts pages in a PDF without a PDF library (an estimate). */
+function pdfPages(bytes) { let s = ''; const n = Math.min(bytes.length, 8e6); for (let i = 0; i < n; i += 65536) s += String.fromCharCode.apply(null, bytes.subarray(i, Math.min(n, i + 65536))); return (s.match(/\/Type\s*\/Page(?![s\w])/g) || []).length; }
+
+return { withCacheMark, MODELS, DEFAULT_MODEL, MAX_TOOL_CALLS, MAX_TOKENS, API_URL, API_VERSION, TOOLS, KeyStore, scrub, looksLikeKey, AIError, httpError, sseParser, assembler, readStream, request, runTurn,
+  Executor, undoTurn, checkContent, literalQty, blockType, blockContent, syntaxGuide, systemPrompt, snapshot, userContent, renderSafe, fmtUsage, pdfPages, MODE_TEXT, SYSTEM_MD };
+})();
+
+/* ================= iCalPad assistant: the chat panel =================
+   Optional. Nothing here contacts Anthropic until the user opens the panel, enters a key and sends a message.
+   The panel changes the worksheet only through window.iCalPad.cmd, the same functions the page's own buttons use. */
+(() => {
+'use strict';
+const P = window.iCalPad;
+if (!P || !P.cmd || typeof AICore === 'undefined') return;
+const A = AICore, Cmd = P.cmd, { toast, el, esc, narrow } = P.ui;
+const store = name => { try { const s = window[name]; s.getItem('x'); return s; } catch (e) { return null; } };
+const LOCAL = store('localStorage'), SESSION = store('sessionStorage');
+const pref = (k, v) => { try { if (v === undefined) return LOCAL && LOCAL.getItem(k); LOCAL && LOCAL.setItem(k, v); } catch (e) { return null; } return null; };
+const keys = A.KeyStore(LOCAL, SESSION);
+const svg = d => `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+const ICON = {
+  chat: svg('<path d="M4 5.5h16v10H9l-4 3.5v-3.5H4z"/><path d="M8 9.5h8M8 12.5h5"/>'),
+  clip: svg('<path d="M15.5 7.5l-6.8 6.8a1.9 1.9 0 0 0 2.7 2.7l7.3-7.3a3.6 3.6 0 0 0-5.1-5.1l-7.4 7.4a5.3 5.3 0 0 0 7.5 7.5l5.8-5.8"/>'),
+  close: svg('<path d="M6 6l12 12M18 6L6 18"/>'),
+  gear: svg('<path d="M4 6h8M16 6h4M4 12h3M11 12h9M4 18h10M18 18h2"/><circle cx="14" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="16" cy="18" r="2"/>'),
+  plus: svg('<path d="M12 5v14M5 12h14"/>'),
+};
+const NOTE = 'Your messages, images and the current worksheet are sent to Anthropic using your own API key. Usage is billed to your Anthropic account.';
+const MODE_NAME = { neat: 'Neat up', solve: 'Set up and solve' };
+const st = {
+  open: false, built: false, model: A.MODELS.some(m => m.id === pref('icalpad.ai.model')) ? pref('icalpad.ai.model') : A.DEFAULT_MODEL,
+  mode: pref('icalpad.ai.mode') === 'solve' ? 'solve' : 'neat', messages: [], images: new Map(), refN: 0, pdfN: 0, pending: [], busy: false, ctrl: null, note: '',
+};
+let root, logEl, setupEl, ta, attEl, sendB, stopB, fileIn;
+
+// ---------- building the panel (only when first opened) ----------
+function build() {
+  root = el(`<aside class="aip" id="aip" aria-label="Assistant" hidden>
+    <div class="aip-hd"><h2>Assistant</h2><span class="grow"></span>
+      <button class="btn icon" type="button" data-a="new" title="New chat" aria-label="New chat">${ICON.plus}</button>
+      <button class="btn icon" type="button" data-a="settings" title="Assistant settings" aria-label="Assistant settings">${ICON.gear}</button>
+      <button class="btn icon" type="button" data-a="close" title="Close the assistant" aria-label="Close the assistant">${ICON.close}</button></div>
+    <div class="aip-mode" role="radiogroup" aria-label="What the assistant should do">
+      <button type="button" role="radio" data-mode="neat" title="Convert what you give it into clean worksheet content. No extra steps.">Neat up</button>
+      <button type="button" role="radio" data-mode="solve" title="Write givens, equations, results and a check. iCalPad computes the answers.">Set up and solve</button></div>
+    <div class="aip-log" aria-live="polite"></div>
+    <div class="aip-setup" hidden></div>
+    <form class="aip-in" autocomplete="off">
+      <div class="aip-att"></div>
+      <div class="aip-box"><textarea rows="2" aria-label="Message to the assistant" placeholder="Type or paste a problem, or drop a photo of your work"></textarea>
+        <div class="aip-row"><button class="btn icon" type="button" data-a="attach" title="Attach a picture or a PDF page" aria-label="Attach a picture or a PDF page">${ICON.clip}</button>
+          <span class="grow"></span><span class="aip-hint">Enter sends, Shift+Enter for a new line</span>
+          <button class="btn line" type="button" data-a="stop" hidden>Stop</button><button class="btn solid" type="submit" data-a="send">Send</button></div></div>
+      <p class="aip-note">${esc(NOTE)}</p>
+    </form>
+    <input type="file" hidden multiple accept="image/png,image/jpeg,image/webp,image/gif,application/pdf">
+  </aside>`);
+  document.querySelector('.main').append(root);
+  logEl = root.querySelector('.aip-log'); setupEl = root.querySelector('.aip-setup'); ta = root.querySelector('textarea'); attEl = root.querySelector('.aip-att');
+  sendB = root.querySelector('[data-a="send"]'); stopB = root.querySelector('[data-a="stop"]'); fileIn = root.querySelector('input[type=file]');
+  root.querySelector('[data-a="close"]').addEventListener('click', () => setOpen(false));
+  root.querySelector('[data-a="settings"]').addEventListener('click', () => showSetup(setupEl.hidden));
+  root.querySelector('[data-a="new"]').addEventListener('click', newChat);
+  root.querySelector('[data-a="attach"]').addEventListener('click', () => fileIn.click());
+  stopB.addEventListener('click', () => { if (st.ctrl) st.ctrl.abort(); });
+  fileIn.addEventListener('change', () => { attach([...fileIn.files]); fileIn.value = ''; });
+  for (const b of root.querySelectorAll('[data-mode]')) b.addEventListener('click', () => setMode(b.dataset.mode));
+  root.querySelector('form').addEventListener('submit', e => { e.preventDefault(); send(); });
+  ta.addEventListener('keydown', e => { if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); send(); } });
+  ta.addEventListener('input', grow);
+  ta.addEventListener('paste', e => {
+    const files = [...((e.clipboardData && e.clipboardData.files) || [])].filter(okType);
+    e.stopPropagation();                              // keep the page from also placing a pasted picture
+    if (files.length) { e.preventDefault(); attach(files); }
+  });
+  root.addEventListener('dragover', e => { if (e.dataTransfer && [...e.dataTransfer.types].includes('Files')) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; root.classList.add('drop'); } });
+  root.addEventListener('dragleave', e => { if (!root.contains(e.relatedTarget)) root.classList.remove('drop'); });
+  root.addEventListener('drop', e => { e.preventDefault(); e.stopPropagation(); root.classList.remove('drop'); if (e.dataTransfer) attach([...e.dataTransfer.files]); });
+  root.addEventListener('keydown', e => { if (e.key === 'Escape' && narrow()) setOpen(false); });
+  setMode(st.mode); st.built = true; empty();
+}
+function grow() { ta.style.height = 'auto'; ta.style.height = Math.min(220, Math.max(52, ta.scrollHeight + 2)) + 'px'; }
+function setMode(m) {
+  st.mode = m === 'solve' ? 'solve' : 'neat'; pref('icalpad.ai.mode', st.mode);
+  for (const b of root.querySelectorAll('[data-mode]')) b.setAttribute('aria-checked', String(b.dataset.mode === st.mode));
+}
+function setOpen(on) {
+  if (on && !st.built) build();
+  st.open = !!on; if (root) root.hidden = !on;
+  document.body.classList.toggle('ai-open', st.open);
+  const b = document.getElementById('b-ai'); if (b) b.setAttribute('aria-pressed', String(st.open));
+  window.dispatchEvent(new Event('resize'));
+  if (on) { if (!keys.has()) showSetup(true); else { showSetup(false); setTimeout(() => ta.focus(), 30); } }
+}
+function empty() {
+  if (logEl.children.length) return;
+  logEl.append(el(`<div class="aip-empty"><p><b>The assistant writes on your worksheet.</b> Give it a typed problem, a photo of handwritten work, a screenshot or a single PDF page. It writes definitions and equations, and iCalPad does the math.</p>
+    <p><b>Neat up</b> converts what you give it. <b>Set up and solve</b> also adds results and a check.</p>
+    <p>Check every line it writes, the same way you would check your own work.</p></div>`));
+}
+
+// ---------- settings: key, model, remember ----------
+function showSetup(on, msg) {
+  if (!st.built) build();
+  setupEl.hidden = !on; logEl.hidden = !!on; root.querySelector('form').hidden = !!on; root.querySelector('.aip-mode').hidden = !!on;
+  if (!on) return;
+  const has = keys.has();
+  setupEl.innerHTML = `<h3>AI assistant settings</h3>
+    <p>The assistant is optional and off until you add a key. It uses your own Anthropic API key and talks to Anthropic directly from this page. There is no iCalPad server.</p>
+    <p>Get a key at <a href="https://console.anthropic.com" target="_blank" rel="noopener noreferrer">console.anthropic.com</a>.</p>
+    ${msg ? `<p class="aip-warn">${esc(msg)}</p>` : ''}
+    <label class="fld"><span>API key</span><input type="password" id="ai-key" autocomplete="off" spellcheck="false" placeholder="${has ? 'A key is saved. Type a new one to replace it.' : 'sk-ant-…'}"></label>
+    <label class="fld"><span>Model</span><select id="ai-model">${A.MODELS.map(m => `<option value="${m.id}"${m.id === st.model ? ' selected' : ''}>${esc(m.name)} (${esc(m.note)})</option>`).join('')}</select></label>
+    <label class="chk"><input type="checkbox" id="ai-rem"${keys.remembered() ? ' checked' : ''}> Remember key on this device</label>
+    <p class="aip-small">Off: the key is kept only until you close this tab. On: it is stored in this browser until you press Forget key. The key is never put in worksheets, files, links or messages.</p>
+    <div class="aip-btns"><button class="btn solid" type="button" id="ai-save">Save</button>${has ? '<button class="btn line" type="button" id="ai-forget">Forget key</button>' : ''}${has ? '<button class="btn line" type="button" id="ai-back">Back to chat</button>' : ''}</div>
+    <p class="aip-note">${esc(NOTE)}</p>`;
+  const $k = setupEl.querySelector('#ai-key');
+  setupEl.querySelector('#ai-save').addEventListener('click', () => {
+    const k = $k.value.trim(), rem = setupEl.querySelector('#ai-rem').checked, model = setupEl.querySelector('#ai-model').value;
+    if (!k && !has) { $k.focus(); toast('Paste your Anthropic API key first.'); return; }
+    if (k && !A.looksLikeKey(k)) toast('That does not look like an Anthropic API key (they start with sk-ant-). Saved anyway.');
+    if (k) keys.set(k, rem); else keys.setRemember(rem);
+    $k.value = '';
+    if (model !== st.model) { st.model = model; pref('icalpad.ai.model', model); if (st.messages.length) { newChat(); toast('Model changed, so a new chat was started.'); } }
+    showSetup(false); setTimeout(() => ta.focus(), 30);
+  });
+  const f = setupEl.querySelector('#ai-forget'); if (f) f.addEventListener('click', () => { keys.forget(); toast('The key was removed from this browser.'); showSetup(true); });
+  const bk = setupEl.querySelector('#ai-back'); if (bk) bk.addEventListener('click', () => showSetup(false));
+  $k.addEventListener('keydown', e => { if (e.key === 'Enter') setupEl.querySelector('#ai-save').click(); });
+  setTimeout(() => (has ? setupEl.querySelector('#ai-model') : $k).focus(), 30);
+}
+
+// ---------- attachments ----------
+const okType = f => /^image\/(png|jpeg|webp|gif)$/.test(f.type) || f.type === 'application/pdf';
+const readURL = f => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(new Error('read')); r.readAsDataURL(f); });
+const loadImg = src => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => rej(new Error('decode')); im.src = src; });
+function b64(bytes) { let s = ''; for (let i = 0; i < bytes.length; i += 32768) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 32768)); return btoa(s); }
+async function prep(f) {
+  if (f.type === 'application/pdf') {
+    if (f.size > 20e6) throw new Error(`${f.name} is larger than 20 MB.`);
+    const bytes = new Uint8Array(await f.arrayBuffer()), pages = A.pdfPages(bytes);
+    if (pages > 5) throw new Error(`${f.name} has about ${pages} pages. Send one page: print or export just that page to PDF.`);
+    return { ref: 'pdf' + (++st.pdfN), mime: 'application/pdf', name: f.name, data: b64(bytes), pages };
+  }
+  const url = await readURL(f), im = await loadImg(url);
+  let w = im.naturalWidth || 800, h = im.naturalHeight || 600, src = url, mime = f.type; const big = Math.max(w, h);
+  if (big > 1568 || f.size > 3.5e6) {                       // the API works best with the longest side at 1568 px or less
+    const k = Math.min(1, 1568 / big), cv = document.createElement('canvas'); cv.width = Math.round(w * k); cv.height = Math.round(h * k);
+    const cx = cv.getContext('2d'); if (mime !== 'image/png') { cx.fillStyle = '#fff'; cx.fillRect(0, 0, cv.width, cv.height); }
+    cx.drawImage(im, 0, 0, cv.width, cv.height); w = cv.width; h = cv.height;
+    src = cv.toDataURL(mime === 'image/png' ? 'image/png' : 'image/jpeg', 0.88); if (src.length > 4.6e6) src = cv.toDataURL('image/jpeg', 0.8);
+    mime = src.slice(5, src.indexOf(';'));
+  }
+  return { ref: 'img' + (++st.refN), mime, name: f.name || 'pasted picture', src, data: src.slice(src.indexOf(',') + 1), w, h };
+}
+async function attach(files) {
+  if (!st.built) build();
+  if (!st.open) setOpen(true);
+  for (const f of files) {
+    if (!okType(f)) { toast(`${f.name || 'That file'} cannot be sent. Use PNG, JPEG, WebP, GIF or a PDF page.`); continue; }
+    try { const a = await prep(f); if (a.pages > 1) toast(`${a.name} has ${a.pages} pages. The whole PDF is sent, and each page adds to the cost.`); st.pending.push(a); }
+    catch (e) { toast(e.message === 'decode' || e.message === 'read' ? `${f.name || 'That picture'} could not be read.` : e.message); }
+  }
+  drawAtt(); ta.focus();
+}
+function drawAtt() {
+  attEl.textContent = '';
+  st.pending.forEach((a, i) => {
+    const c = el(`<span class="aip-chip">${a.src ? '<img alt="">' : '<b>PDF</b>'}<span class="nm"></span><button type="button" class="x" aria-label="Remove">×</button></span>`);
+    if (a.src) c.querySelector('img').src = a.src;
+    c.querySelector('.nm').textContent = a.name;
+    c.querySelector('.x').addEventListener('click', () => { st.pending.splice(i, 1); drawAtt(); });
+    attEl.append(c);
+  });
+}
+
+// ---------- messages ----------
+function scrollDown() { logEl.scrollTop = logEl.scrollHeight; }
+function userMsg(text, atts) {
+  const m = el(`<div class="am user"><div class="att"></div><div class="tx"></div></div>`);
+  for (const a of atts) {
+    if (a.src) { const im = el('<img alt="">'); im.src = a.src; im.title = a.ref + ': ' + a.name; m.querySelector('.att').append(im); }
+    else { const s = el('<span class="pdf"></span>'); s.textContent = `PDF: ${a.name}${a.pages ? ` (${a.pages} ${a.pages === 1 ? 'page' : 'pages'})` : ''}`; m.querySelector('.att').append(s); }
+  }
+  m.querySelector('.tx').textContent = text || (atts.length ? '(no message)' : '');
+  logEl.append(m); scrollDown();
+}
+function botMsg() {
+  const m = el(`<div class="am bot"><div class="tx"></div><div class="st"></div>
+    <details class="acts" hidden><summary></summary><ol></ol></details>
+    <div class="err" hidden></div><div class="ft"><button class="btn line" type="button" data-undo hidden>Undo AI changes</button><span class="use"></span></div></div>`);
+  logEl.append(m); scrollDown();
+  return { m, tx: m.querySelector('.tx'), st: m.querySelector('.st'), acts: m.querySelector('.acts'), err: m.querySelector('.err'), undo: m.querySelector('[data-undo]'), use: m.querySelector('.use'), text: '' };
+}
+const VERB = { add_block: 'Adding', edit_block: 'Changing', move_block: 'Moving', delete_block: 'Deleting', evaluate: 'Checking the worksheet', get_result: 'Reading a result', get_worksheet: 'Reading the worksheet', get_syntax_guide: 'Reading the syntax guide', attach_source_image: 'Attaching the source picture' };
+function drawActs(v, X) {
+  const n = X.actions.length; v.acts.hidden = !n; if (!n) return;
+  v.acts.querySelector('summary').textContent = `Changed the worksheet (${n} ${n === 1 ? 'change' : 'changes'})`;
+  const ol = v.acts.querySelector('ol'); ol.textContent = '';
+  for (const a of X.actions) {
+    const li = el('<li><span class="op"></span> <code></code></li>');
+    li.querySelector('.op').textContent = `${a.op} ${a.type}:`; li.querySelector('code').textContent = a.text;
+    li.addEventListener('click', () => Cmd.flash([a.id])); ol.append(li);
+  }
+}
+let paintQ = 0;
+function paintText(v) { if (paintQ) return; paintQ = requestAnimationFrame(() => { paintQ = 0; v.tx.innerHTML = A.renderSafe(v.text); scrollDown(); }); }   // renderSafe escapes model text first
+function setBusy(on) { sendB.hidden = on; stopB.hidden = !on; st.busy = on; root.classList.toggle('busy', on); for (const b of logEl.querySelectorAll('[data-undo]')) if (!b.dataset.done) b.disabled = on; }
+
+// ---------- one turn ----------
+async function send() {
+  if (st.busy) return;
+  if (!keys.has()) { showSetup(true, 'Add your Anthropic API key to start.'); return; }
+  const text = ta.value.trim(), atts = st.pending.splice(0);
+  if (!text && !atts.length) return;
+  ta.value = ''; grow(); drawAtt();
+  const ep = logEl.querySelector('.aip-empty'); if (ep) ep.remove();
+  for (const a of atts) if (a.src) st.images.set(a.ref, { src: a.src, name: a.name, w: a.w, h: a.h });
+  userMsg(text, atts);
+  const note = st.note; st.note = '';
+  const content = A.userContent({ text: (note ? note + '\n\n' : '') + text, mode: st.mode, attachments: atts, page: A.snapshot(Cmd.regions(), Cmd.evaluate()) });
+  await run(botMsg(), content);
+}
+async function run(v, content) {
+  const X = A.Executor(Cmd, { images: st.images }), usage = {};
+  st.ctrl = new AbortController(); setBusy(true); v.st.textContent = 'Sending…';
+  let out = null, sep = false;
+  Cmd.begin();                                      // everything this turn changes becomes one undo step
+  try {
+    out = await A.runTurn({
+      fetchFn: (u, o) => window.fetch(u, o), key: keys.get(), model: st.model, messages: st.messages, content, usage, signal: st.ctrl.signal,
+      exec: (name, input) => { const r = X.exec(name, input); if (r.ok && r.result && r.result.id && X.changed.has(r.result.id)) Cmd.flash([r.result.id]); drawActs(v, X); return r; },
+      on: (type, d) => {
+        if (type === 'text') { if (sep) { v.text += '\n\n'; sep = false; } v.text += d; paintText(v); v.st.textContent = ''; }
+        else if (type === 'message') { if (v.text) sep = true; }
+        else if (type === 'status') v.st.textContent = d.text || '';
+        else if (type === 'tool_start') v.st.textContent = 'Working on the worksheet…';
+        else if (type === 'tool') v.st.textContent = (VERB[d.name] || 'Working') + (d.input && d.input.type ? ' ' + d.input.type : '') + '…';
+      },
+    });
+    if (out.limitHit) fail(v, `Stopped after ${A.MAX_TOOL_CALLS} worksheet actions in one message. Send "continue" to let it finish.`);
+    else if (out.stop === 'max_tokens') fail(v, 'The reply reached its length limit. Send "continue" to let it finish.');
+    else if (out.stop === 'refusal') fail(v, 'The model declined to answer this request.');
+  } catch (e) {
+    if (e.kind === 'abort') fail(v, 'Stopped.');
+    else fail(v, A.scrub(e.message, keys.get()), e.kind);
+  } finally {
+    Cmd.end(); st.ctrl = null; setBusy(false); v.st.textContent = '';
+    if (paintQ) { cancelAnimationFrame(paintQ); paintQ = 0; } v.tx.innerHTML = A.renderSafe(v.text);
+    if (!v.text && !v.err.textContent && !X.actions.length) v.tx.innerHTML = '<p class="muted">No reply.</p>';
+    drawActs(v, X);
+    if (usage.requests) v.use.textContent = A.fmtUsage(usage);
+    if (X.log.length) {
+      Cmd.flash([...X.changed]);
+      v.undo.hidden = false;
+      v.undo.onclick = () => {
+        if (st.busy) return;
+        Cmd.begin(); const r = A.undoTurn(Cmd, X.log); Cmd.end();
+        v.undo.disabled = true; v.undo.dataset.done = '1'; v.undo.textContent = 'AI changes undone';
+        st.note = '(I undid the worksheet changes from your previous reply.)';
+        toast(r.skipped.length ? `Undone. ${r.skipped.length} ${r.skipped.length === 1 ? 'block you edited afterwards was' : 'blocks you edited afterwards were'} left as they are.` : 'The changes from that reply were undone.');
+      };
+    }
+    scrollDown();
+  }
+}
+function fail(v, msg, kind) {
+  v.err.hidden = false; v.err.textContent = '';
+  const p = el('<p></p>'); p.textContent = msg; v.err.append(p);
+  if (kind === 'auth') { const b = el('<button class="btn line" type="button">Open assistant settings</button>'); b.addEventListener('click', () => showSetup(true)); v.err.append(b); }
+  const last = st.messages[st.messages.length - 1];
+  if (kind && kind !== 'abort' && last && last.role === 'user') {
+    const b = el('<button class="btn line" type="button">Try again</button>');
+    b.addEventListener('click', () => { if (st.busy) return; if (!keys.has()) { showSetup(true); return; } b.remove(); run(botMsg(), []); });
+    v.err.append(b);
+  }
+}
+function newChat() {
+  if (st.ctrl) st.ctrl.abort();
+  st.messages = []; st.images.clear(); st.refN = 0; st.pdfN = 0; st.pending = []; st.note = '';
+  if (st.built) { logEl.textContent = ''; drawAtt(); empty(); showSetup(!keys.has()); }
+}
+
+// ---------- the toolbar button ----------
+const top = document.querySelector('.top'), ex = document.getElementById('b-ex');
+if (top && ex && !document.getElementById('b-ai')) {
+  const b = el(`<button class="btn wide-only" id="b-ai" type="button" aria-pressed="false" title="AI assistant (optional, uses your own Anthropic API key)">${ICON.chat}Assistant</button>`);
+  b.addEventListener('click', () => setOpen(!st.open)); ex.before(b);
+}
+P.ai = {
+  isOpen: () => st.open, open: () => setOpen(true), toggle: () => setOpen(!st.open), attach,
+  openSettings: () => { setOpen(true); showSetup(true); },
+};
 })();
 
 </script>

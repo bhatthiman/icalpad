@@ -4,7 +4,7 @@
 
 ### [▶ Open iCalPad](https://hse95.github.io/icalpad/)
 
-The whole app is **one HTML file of about 270 KB** (about 84 KB over the network). It opens in a second, works on a phone, and keeps your worksheet in your own browser.
+The whole app is **one HTML file of about 350 KB** (about 110 KB over the network). It opens in a second, works on a phone, and keeps your worksheet in your own browser.
 
 > [!IMPORTANT]
 > **Always check your answers.** iCalPad is a new tool and may contain errors. Verify any result before you rely on it, especially in design or other work where a mistake matters.
@@ -21,6 +21,7 @@ I was tired of paying for software, especially symbolic calculators. Tools such 
 - **LaTeX in and out.** Paste LaTeX and it becomes live math. Copy any line, or the whole page, as LaTeX for a paper or report.
 - **Plots you can animate.** Sweep a value over time or trace a curve as it is drawn.
 - **Pictures with markup.** Drop or paste a photo of a problem, then draw arrows, scribbles and labels on it, and erase marks you don't want. Apple Pencil and other styluses draw directly on a selected picture.
+- **An optional AI assistant.** Bring your own Anthropic API key, then give it a typed problem or a photo of handwritten work. It writes the worksheet; iCalPad does every calculation. Off unless you turn it on.
 - **Its own right-click menu.** Right-click anywhere to add math, notes, plots or pictures at that spot, paste, or copy LaTeX. Shift + right-click still opens the browser's menu.
 
 ## See it in action
@@ -48,6 +49,18 @@ Plots follow the worksheet, so changing an input redraws them. Press play to swe
 Add a photo or screenshot of a problem, draw on it with the pen, arrow and label tools, and work the solution right beside it.
 
 ![Marking up a picture of a problem and solving it on the same page](docs/media/picture.gif)
+
+### An optional assistant that writes the worksheet
+
+Open **Assistant**, add your own Anthropic API key, and type a problem or drop in a photo, a screenshot or a PDF page. The assistant writes headings, givens with units, equations and result lines through the same commands the page uses. Every number on the page is computed by iCalPad, not typed by the model. Each reply lists what it changed and has an **Undo AI changes** button.
+
+![The assistant turning handwritten notes into a worksheet, with the photo attached for comparison](docs/media/ai-handwritten.png)
+
+It has two modes. **Neat up** converts what you give it and adds nothing. **Set up and solve** writes the givens, assumptions, equations, results and a check.
+
+![Set up and solve: a beam flexure check written by the assistant and computed by iCalPad](docs/media/ai-solve.png)
+
+The assistant is off by default and nothing is sent anywhere until you open it and enter a key. Your messages, images and the current worksheet are then sent to Anthropic using your own API key, and usage is billed to your Anthropic account. There is no iCalPad server in between. Get a key at [console.anthropic.com](https://console.anthropic.com). See the [user guide](docs/user-guide.md#ai-assistant) for details.
 
 ## What you can type
 
@@ -86,7 +99,9 @@ iCalPad is a young, single-file web app, and it does not try to match every feat
 
 ## Your data
 
-Everything runs in your browser. Worksheets are saved in your browser's storage and can be saved to a `.json` file from the **File** menu. Nothing is sent to a server. The only outside requests are the web fonts and, if you turn it on, the advanced solver download.
+Everything runs in your browser. Worksheets are saved in your browser's storage and can be saved to a `.json` file from the **File** menu. Nothing is sent to a server. The only outside requests are the web fonts, the advanced solver download if you turn it on, and, if you use the assistant, requests from your browser straight to Anthropic with your own key.
+
+Your API key is kept in memory and this tab's session storage, or in local storage only if you tick **Remember key on this device**. It is never put in worksheets, saved files, links or error messages. **Forget key** removes it.
 
 ## Run it offline or host it yourself
 
@@ -98,7 +113,8 @@ The app is written as plain JavaScript in `src/` with no dependencies. The build
 
 ```bash
 npm run build        # writes index.html
-npm test             # engine tests, every example worksheet, and a fuzz test
+npm test             # engine tests, every example worksheet, a fuzz test, and the assistant's unit tests
+npm run test:e2e     # browser tests of the assistant with the API mocked (needs Playwright)
 npm run test:solver  # advanced solver tests (needs python3 and sympy)
 ```
 
@@ -108,7 +124,11 @@ npm run test:solver  # advanced solver tests (needs python3 and sympy)
 | `src/45-bridge.js`, `src/bridge.py` | The link to the optional SymPy solver |
 | `src/50-data.js` | Example worksheets and help text |
 | `src/60-app.js`, `src/style.css`, `src/shell.html` | The interface |
+| `src/70-ai-core.js`, `src/75-ai-ui.js`, `src/ai/system-prompt.md` | The optional assistant: key storage, streaming client, worksheet tools, chat panel, and the hand-written part of its instructions |
 | `test/` | Tests |
+| `docs/` | [User guide](docs/user-guide.md), [design decisions](docs/decisions.md), pictures |
+
+Changes are listed in the [changelog](CHANGELOG.md).
 
 It has been tested in Chrome on desktop and on a phone-sized screen. If something does not work in your browser, please open an issue.
 

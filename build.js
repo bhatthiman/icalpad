@@ -11,12 +11,19 @@ const core = `const Core = (() => {\n'use strict';\n${parts.join('\n')}\n${api}\
 fs.mkdirSync(path.join(__dirname, 'dist'), { recursive: true });
 fs.writeFileSync(path.join(__dirname, 'dist', 'core.cjs'), core + 'module.exports = Core;\n');
 
+// The assistant: its core (also a Node module for the tests), its system prompt, and its panel.
+const version = JSON.parse(fs.readFileSync(path.join(__dirname, 'package.json'), 'utf8')).version;
+const aiCore = rd('70-ai-core.js').replace('"__SYSTEM_MD__"', () => JSON.stringify(rd('ai/system-prompt.md')));
+fs.writeFileSync(path.join(__dirname, 'dist', 'ai.cjs'), `${core}\n${rd('50-data.js')}\n${aiCore}\nmodule.exports = { Core, AICore, HELP, EXAMPLES, fromScript };\n`);
+
 const html = rd('shell.html')
   .replace('/*__CSS__*/', () => rd('style.css'))
   .replace('/*__CORE__*/', () => core)
   .replace('/*__DATA__*/', () => rd('50-data.js'))
-  .replace('/*__APP__*/', () => rd('60-app.js').replace('"__BRIDGE__"', () => JSON.stringify(rd('bridge.py'))));
+  .replace('/*__APP__*/', () => rd('60-app.js').replace('"__BRIDGE__"', () => JSON.stringify(rd('bridge.py'))).replace("'__VERSION__'", () => JSON.stringify(version)))
+  .replace('/*__AI__*/', () => aiCore + '\n' + rd('75-ai-ui.js'));
 fs.writeFileSync(path.join(__dirname, 'index.html'), html);
 
 console.log(`index.html  ${(Buffer.byteLength(html) / 1024).toFixed(1)} KB`);
 console.log(`dist/core.cjs  ${(Buffer.byteLength(core) / 1024).toFixed(1)} KB`);
+console.log(`version ${version}`);

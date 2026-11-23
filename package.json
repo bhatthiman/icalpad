@@ -1,6 +1,6 @@
 {
   "name": "icalpad",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A free-form math worksheet with units, symbolic math, LaTeX, animated plots and picture markup. One HTML file that runs in the browser.",
   "private": true,
   "license": "MIT",
@@ -9,7 +9,8 @@
   "repository": { "type": "git", "url": "https://github.com/hse95/icalpad.git" },
   "scripts": {
     "build": "node build.js",
-    "test": "node build.js && node test/core.test.js && node test/data.test.js && node test/fuzz.js",
+    "test": "node build.js && node test/core.test.js && node test/data.test.js && node test/fuzz.js && node test/ai.test.js",
+    "test:e2e": "node build.js && node test/e2e/ai.e2e.js",
     "test:solver": "node build.js && node test/adv.test.js"
   },
   "engines": { "node": ">=18" }

@@ -22,6 +22,7 @@ const IC = {
   erase: '<path d="M8 20h11"/><path d="M5.6 14.4 13.9 6a2 2 0 0 1 2.8 0l2.3 2.3a2 2 0 0 1 0 2.8L10.8 19.3a2 2 0 0 1-1.4.6H8.2a2 2 0 0 1-1.4-.6l-1.2-1.2a2.6 2.6 0 0 1 0-3.7z"/><path d="M9.6 10.4l5 5"/>', arrow: '<path d="M5 19 19 5M10 5h9v9"/>', label: '<path d="M5 6h14M12 6v13M9 19h6"/>',
 };
 const ic = n => `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${IC[n]}</svg>`;
+const APP_VERSION = '__VERSION__';
 const LS = {
   get(k) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : null; } catch (e) { return null; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } },
@@ -89,7 +90,9 @@ const typing = () => /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tag
 let cmT = 0, svT = 0, warned = false;
 const snapshot = () => JSON.stringify({ ...S.doc, images: undefined });
 function persist() { if (!DB.set('doc', S.doc) && !LS.set('icalpad.doc', S.doc) && !warned) { warned = true; toast('This worksheet is too large to keep in the browser. Use File, then Save as a file.'); } }
+let batchDepth = 0, batchDirty = false;      // > 0 while the assistant works: its changes become one undo step
 function commit() {
+  if (batchDepth > 0) { batchDirty = true; clearTimeout(cmT); return; }
   clearTimeout(cmT); const s = snapshot();
   if (S.hist[S.hpos] === s) return;
   S.hist = S.hist.slice(0, S.hpos + 1); S.hist.push(s); if (S.hist.length > 120) S.hist.shift();
@@ -121,9 +124,11 @@ function cleanDoc(d) {                      // accept only the fields a workshee
       if (typeof src === 'string' && src.length < 12e6 && IMG_OK.test(src)) { key = keys.get(r.img) || 'i' + nid(); keys.set(r.img, key); images[key] = src; }
       const ann = (Array.isArray(r.ann) ? r.ann : []).slice(0, 400).map(a => a && a.t === 'text' ? { t: 'text', c: num(a.c, 0, 4, 0) | 0, x: num(a.x, -200, 1200, 0), y: num(a.y, -200, 5000, 0), s: str(a.s, 120) }
         : a && (a.t === 'pen' || a.t === 'arrow') && Array.isArray(a.p) ? { t: a.t, c: num(a.c, 0, 4, 0) | 0, p: a.p.slice(0, a.t === 'arrow' ? 4 : 4000).map(v => Math.round(num(v, -500, 6000, 0))) } : null).filter(Boolean);
-      return { ...base, type: 'image', img: key, w: num(r.w, 60, 1600, 360), ar: num(r.ar, 0.05, 8, 0.62), ann };
+      const im = { ...base, type: 'image', img: key, w: num(r.w, 60, 1600, 360), ar: num(r.ar, 0.05, 8, 0.62), ann };
+      if (r.ref) { im.ref = true; im.cap = str(r.cap, 120) || 'Source image'; if (r.fold) im.fold = true; }
+      return im;
     }
-    if (r.type === 'text') return { ...base, type: 'text', src: str(r.src), w: num(r.w, 120, 1600, 640) };
+    if (r.type === 'text') { const t = { ...base, type: 'text', src: str(r.src), w: num(r.w, 120, 1600, 640) }; if (r.kind === 'note') t.kind = 'note'; return t; }
     return { ...base, type: 'math', src: str(r.src) };
   });
   return { v: 2, title: str(d.title, 200), by: str(d.by, 80), date: str(d.date, 80), sheet: str(d.sheet, 20), auto, images, regions };
@@ -261,7 +266,7 @@ function buildMath(rg) {
 }
 function autosize(ta) { ta.style.height = 'auto'; ta.style.height = Math.max(40, ta.scrollHeight + 2) + 'px'; }
 function buildText(rg) {
-  const e = el(`<section class="rg text" data-id="${rg.id}">${hdlHtml}<div class="body"><div class="view"></div><div class="edit"><textarea class="tsrc" id="in-${rg.id}" rows="1" aria-label="Note" placeholder="Write a note. Start with # for a heading. Put math between $ signs."></textarea></div></div><span class="rz w" title="Drag to change the width"></span></section>`);
+  const e = el(`<section class="rg text${rg.kind === 'note' ? ' note' : ''}" data-id="${rg.id}">${hdlHtml}<div class="body"><div class="view"></div><div class="edit"><textarea class="tsrc" id="in-${rg.id}" rows="1" aria-label="Note" placeholder="Write a note. Start with # for a heading. Put math between $ signs."></textarea></div></div><span class="rz w" title="Drag to change the width"></span></section>`);
   const ta = e.querySelector('.tsrc'), view = e.querySelector('.view'); ta.value = rg.src || '';
   const paintText = () => { view.innerHTML = rg.src.trim() ? Core.mdToHtml(rg.src) : '<p class="ph">Empty note</p>'; };
   e._paint = paintText; paintText();
@@ -347,6 +352,13 @@ function buildImage(rg) {
       <button class="btn line" type="button" data-do="undo">Undo mark</button><button class="btn line" type="button" data-do="clear">Clear marks</button>
     </div></div><span class="rz" title="Drag to resize"></span></section>`);
   if (src) e.querySelector('img').src = src;
+  if (rg.ref) {
+    const bar = el(`<div class="srcbar"><span class="cap"></span><button class="btn line" type="button" data-fold></button></div>`), fb = bar.querySelector('[data-fold]');
+    bar.querySelector('.cap').textContent = rg.cap || 'Source image';
+    const syncFold = () => { e.classList.toggle('folded', !!rg.fold); fb.textContent = rg.fold ? 'Show' : 'Hide'; fb.setAttribute('aria-expanded', !rg.fold); };
+    fb.addEventListener('click', () => { rg.fold = !rg.fold; syncFold(); touch(); commit(); fitCanvas(); });
+    e.querySelector('.body').prepend(bar); syncFold();
+  }
   const fig = e.querySelector('.fig'), svg = fig.querySelector('svg'); let tool = 'move', col = src ? 0 : 2, live = null, ring = null;
   const marks = [];                         // this picture's own undo list: {add} or {erased: [[index, mark], ...]}
   const H = () => Math.round(1000 * rg.ar);
@@ -826,7 +838,12 @@ desk.addEventListener('dragover', e => { if (e.dataTransfer && [...e.dataTransfe
 desk.addEventListener('drop', e => {
   const dt = e.dataTransfer; if (!dt) return; e.preventDefault();
   const p = canvasPt(e), at = FREE ? { x: Math.max(0, snap(p.x)), y: Math.max(0, snap(p.y)), room: false } : null;
-  const imgs = [...dt.files].filter(f => f.type.startsWith('image/'));
+  const imgs = [...dt.files].filter(f => f.type.startsWith('image/')), ai = window.iCalPad.ai;
+  const forAi = [...dt.files].filter(f => /^image\/(png|jpeg|gif|webp)$/.test(f.type) || f.type === 'application/pdf');
+  if (ai && ai.isOpen() && forAi.length) {
+    openMenu(pointAnchor(e.clientX, e.clientY), [{ label: 'Send to the assistant', act: () => ai.attach(forAi) }, ...(imgs.length ? [{ label: 'Place on the page', act: () => addPictures(imgs, at) }] : [])]);
+    return;
+  }
   if (imgs.length) addPictures(imgs, at); else { const t = dt.getData('text/plain'); if (t && t.trim()) pasteText(t, at); else if (dt.files.length) toast('Only pictures can be dropped onto the page.'); }
 });
 
@@ -920,7 +937,9 @@ function settingsMenu(anchor) {
   const opt = (v, cur, label) => `<option value="${v}"${String(v) === String(cur) ? ' selected' : ''}>${label}</option>`;
   openMenu(anchor, [{ html: `<div class="row"><label for="set-sig">Digits shown</label><select id="set-sig">${[3, 4, 5, 6, 8].map(n => opt(n, S.set.sig, n)).join('')}</select></div>
     <div class="row"><label for="set-sys">Units for answers</label><select id="set-sys">${opt('auto', S.set.system, 'Follow the worksheet')}${opt('SI', S.set.system, 'SI')}${opt('US', S.set.system, 'US customary')}</select></div>
-    <div class="row"><label for="set-th">Appearance</label><select id="set-th">${opt('auto', S.set.theme, 'Match my device')}${opt('light', S.set.theme, 'Light')}${opt('dark', S.set.theme, 'Dark')}</select></div>` }], m => {
+    <div class="row"><label for="set-th">Appearance</label><select id="set-th">${opt('auto', S.set.theme, 'Match my device')}${opt('light', S.set.theme, 'Light')}${opt('dark', S.set.theme, 'Dark')}</select></div>
+    <div class="row"><span>AI assistant</span><button class="btn line" type="button" id="set-ai">Set up…</button></div>` }], m => {
+    m.querySelector('#set-ai').addEventListener('click', () => { closeMenu(); if (window.iCalPad.ai) window.iCalPad.ai.openSettings(); });
     const on = (id, f) => m.querySelector(id).addEventListener('change', e => { f(e.target.value); LS.set('icalpad.set', S.set); recalc(); });
     on('#set-sig', v => { S.set.sig = +v; }); on('#set-sys', v => { S.set.system = v; }); on('#set-th', v => { S.set.theme = v; applyTheme(); });
   });
@@ -928,7 +947,8 @@ function settingsMenu(anchor) {
 function helpDialog() {
   dialog({ title: 'How iCalPad works', body: `<div class="help">${HELP.map(([h, rows]) => `<h3>${esc(h)}</h3>${rows.map(([c, d]) => `<div class="hr"><code>${esc(c)}</code><span>${esc(d)}</span></div>`).join('')}`).join('')}
     <h3>Keys</h3><div class="hr"><code>Enter</code><span>New line below</span></div><div class="hr"><code>↑ ↓</code><span>Previous or next line</span></div><div class="hr"><code>Esc</code><span>Finish editing</span></div><div class="hr"><code>Alt while dragging</code><span>Move without snapping</span></div>
-    <h3>LaTeX</h3><div class="hr"><code>\\frac{w L^2}{8} =</code><span>Any line can be typed or pasted as LaTeX</span></div><div class="hr"><code>Copy as LaTeX</code><span>In a line's menu, and under File for the whole page</span></div></div>` });
+    <h3>LaTeX</h3><div class="hr"><code>\\frac{w L^2}{8} =</code><span>Any line can be typed or pasted as LaTeX</span></div><div class="hr"><code>Copy as LaTeX</code><span>In a line's menu, and under File for the whole page</span></div>
+    <p class="ver">iCalPad version ${APP_VERSION}</p></div>` });
 }
 
 // ---------- wiring ----------
@@ -946,7 +966,7 @@ $('#b-set').addEventListener('click', e => settingsMenu(e.currentTarget));
 $('#b-help').addEventListener('click', helpDialog);
 $('#b-more').addEventListener('click', e => {
   const a = e.currentTarget;
-  openMenu(a, [{ label: 'Add a sketch', act: () => addRegion('sketch') }, { label: 'Redo', act: redo }, '-', ...fileItems(), '-',
+  openMenu(a, [{ label: 'Assistant', act: () => window.iCalPad.ai && window.iCalPad.ai.toggle() }, { label: 'Add a sketch', act: () => addRegion('sketch') }, { label: 'Redo', act: redo }, '-', ...fileItems(), '-',
     { label: Adv.state === 'ready' ? 'Advanced solver is on' : 'Solver…', act: () => setTimeout(() => solverMenu(a), 0) },
     { label: 'How iCalPad works', act: helpDialog }, { label: 'Settings…', act: () => setTimeout(() => settingsMenu(a), 0) }]);
 });
@@ -1023,5 +1043,50 @@ async function start(hot) {
 const hotApi = window.claude && window.claude.hot;
 if (hotApi && hotApi.snapshot) hotApi.snapshot(() => ({ doc: S.doc }));
 if (hotApi && hotApi.ready) hotApi.ready(start); else start((hotApi && hotApi.data) || {});
-window.iCalPad = { state: S, Core, Adv };
+// ---------- command layer: the assistant changes the page only through these, built on the functions the UI uses ----------
+function rebuildRegion(rg) {
+  const old = els.get(rg.id); if (!old) return;
+  if (keysEl.parentElement && old.contains(keysEl)) keysEl.remove();
+  plots.delete(rg.id); const e = build(rg); old.replaceWith(e);
+  if (S.active === rg.id) { e.classList.add('on'); if (rg.type === 'math') e.querySelector('.edit').append(keysEl); }
+}
+function slotBelow(afterId) {                  // where a block written by the assistant goes
+  if (!FREE && S.doc.auto) flowPositions();
+  const a = afterId && region(afterId);
+  if (a) return { x: a.x, y: a.y + els.get(a.id).offsetHeight + 6, room: true };
+  let b = -Infinity; for (const r of S.doc.regions) { const e = els.get(r.id); if (e) b = Math.max(b, r.y + e.offsetHeight); }
+  return { x: 26, y: Number.isFinite(b) ? b + 10 : 14, room: false };
+}
+const Cmd = {
+  regions: () => S.doc.regions,
+  region: id => region(id),
+  results: () => S.results,
+  add(spec, afterId) {
+    const p = slotBelow(afterId);
+    if (spec.type === 'text' && /^#/.test(spec.src || '') && S.doc.regions.length) p.y += 10;
+    return insertRegion(spec, p);
+  },
+  edit(id, patch) { const rg = region(id); if (!rg) return null; Object.assign(rg, patch); rebuildRegion(rg); touch(); recalc(); fitCanvas(); return rg; },
+  move(id, afterId) {
+    const rg = region(id), e = els.get(id); if (!rg) return null;
+    const a = afterId && region(afterId);
+    if (a) { rg.x = a.x; rg.y = a.y + els.get(a.id).offsetHeight + 6; } else { rg.x = 26; rg.y = 14; }
+    makeRoom(rg.x, rg.y, e.offsetHeight + 4, id); place(e, rg);
+    S.doc.auto = false; sortRegions(); touch(); recalc(); fitCanvas(); return rg;
+  },
+  positions() { const p = {}; for (const r of S.doc.regions) p[r.id] = { x: r.x, y: r.y }; return p; },
+  setPositions(map) { let n = 0; for (const r of S.doc.regions) if (map[r.id]) { r.x = map[r.id].x; r.y = map[r.id].y; place(els.get(r.id), r); n++; } if (n) { sortRegions(); touch(); recalc(); fitCanvas(); } },
+  remove(id) { const rg = region(id); if (!rg) return null; const copy = JSON.parse(JSON.stringify(rg)); removeRegion(id); return copy; },
+  restore(copy) { if (!copy || region(copy.id)) return; S.doc.regions.push(copy); rgsEl.append(build(copy)); sortRegions(); touch(); recalc(); fitCanvas(); },
+  evaluate() { recalc(); return S.results; },
+  addImage(src) { const key = 'i' + nid(); S.doc.images[key] = src; return key; },
+  begin() { if (!batchDepth) commit(); batchDepth++; },
+  end() { batchDepth = Math.max(0, batchDepth - 1); if (!batchDepth && batchDirty) { batchDirty = false; commit(); } },
+  flash(ids) {
+    let last = null;
+    for (const id of ids) { const e = els.get(id); if (!e) continue; e.classList.remove('ai-flash'); void e.offsetWidth; e.classList.add('ai-flash'); last = e; setTimeout(() => e.classList.remove('ai-flash'), 2600); }
+    if (last) { const r = last.getBoundingClientRect(), d = $('#desk').getBoundingClientRect(); if (r.top < d.top || r.bottom > d.bottom - 60) last.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+  },
+};
+window.iCalPad = { state: S, Core, Adv, cmd: Cmd, docJson, ui: { toast, dialog, openMenu, closeMenu, pointAnchor, el, esc, narrow } };
 })();

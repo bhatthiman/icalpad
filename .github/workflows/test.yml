@@ -1,0 +1,22 @@
+name: Tests
+on:
+  push:
+    branches: [main]
+  pull_request:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Engine, examples, fuzz and assistant unit tests
+        run: npm test
+      - name: The built page is up to date
+        run: git diff --exit-code index.html
+      - name: Browser tests (Anthropic API mocked, no network calls)
+        run: |
+          npm i --no-save playwright@1
+          npx playwright install --with-deps chromium
+          npm run test:e2e
